@@ -9,6 +9,7 @@
   "author": "Paul Tomchik",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.13.4"
+    "express": "^4.13.4",
+    "lodash": "^4.8.2"
   }
 }
