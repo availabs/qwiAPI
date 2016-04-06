@@ -1,0 +1,14 @@
+{
+  "name": "qwiAPI",
+  "version": "0.1.0",
+  "description": "API server for the QWI dataset.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Paul Tomchik",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.13.4"
+  }
+}
