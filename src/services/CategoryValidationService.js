@@ -95,8 +95,9 @@ let verifyCategoriesSupported = (categories) => {
     let unsupportedCategories = _.difference(categories, workerCategories.concat(firmCategories))
 
     if (unsupportedCategories.length) {
-        return 'The following requested categories are not recognized: ' + 
-                unsupportedCategories.join(',') + '.\n'
+        return 'The following requested categor' + 
+                ((unsupportedCategories.length > 1) ? 'ies are ' : 'y is ') +  
+                'not recognized: [' + unsupportedCategories.join(', ') + '].\n'
     } 
 
     return ''

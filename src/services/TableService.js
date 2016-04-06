@@ -1,8 +1,6 @@
 'use strict'
 
 /*
-    This module exports the 
-    
     This API is build to support only the Metropolitan/Micropolitan level data.
     
         This entails the following tables:
@@ -32,7 +30,6 @@ module.exports = {
 
         let tableName
        
-console.log(JSON.stringify(reqCatObj, null, 4))
 
         // Worker characteristics
         if (reqCatObj.agegrp) {
