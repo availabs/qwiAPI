@@ -19,12 +19,19 @@ const getTableName = require('./src/services/TableService').getTableName
 var port = (require('process').env.PORT || 10101)
 
 
-app.get('/*', (req, res) => {
+app.post('/admin/database/teardown', (req, res) => {
+})
 
-    let url = req.url
 
-    if (url === '/favicon.ico') { return res.status(400).send({ error: 'This is an API server. No favicons.' }) }
-        
+app.post('/admin/database/setup', (req, res) => {
+})
+
+
+
+app.get('/data/*', (req, res) => {
+
+    let url = req.url.replace('/data/', '')
+
 
     let requestedCategories = url.toLowerCase()    // For case insensitive queries
                                  .split('?')[0]    // The URL before the query params
