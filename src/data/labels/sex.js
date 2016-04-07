@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 module.exports = {
 
@@ -6,5 +6,4 @@ module.exports = {
 	"1"  :	"Male",
 	"2"  :	"Female",
 
-};
-
+}

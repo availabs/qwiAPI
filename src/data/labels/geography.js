@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 module.exports = {
 
@@ -106,5 +106,4 @@ module.exports = {
 	"5040860"   :	"Rutland, VT",
 	"5099999"   :	"Nonmetropolitan, nonmicropolitan",
 
-};
-
+}

@@ -1,7 +1,6 @@
-// TODO: Create A Script to generate this file.
-// Note: converted all names to lowercase.
+'use strict'
 
-'use strict';
+
 
 module.exports = {
 
@@ -38,4 +37,4 @@ module.exports = {
 	'earnseps'      :  'Separations stable jobs: Average monthly earnings',
 	'payroll'       :  'Total quarterly payroll: Sum',
 
-};
+}

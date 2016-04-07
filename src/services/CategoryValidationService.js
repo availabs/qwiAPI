@@ -34,6 +34,12 @@ const firmCategories = [
     'firmsize',
 ]
 
+const otherCategories = [
+    'geography',
+    'industry',
+]
+
+const supportedCategories = _.concat(workerCategories, firmCategories, otherCategories)
 
 let validateWorkerCharacteristicCombinations = (reqCatObj) => {
 
@@ -92,7 +98,7 @@ let validateFirmCharacteristicCombinations = (reqCatObj) => {
 
 
 let verifyCategoriesSupported = (categories) => {
-    let unsupportedCategories = _.difference(categories, workerCategories.concat(firmCategories))
+    let unsupportedCategories = _.difference(categories, supportedCategories)
 
     if (unsupportedCategories.length) {
         return 'The following requested categor' + 

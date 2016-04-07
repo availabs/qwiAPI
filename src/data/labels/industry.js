@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 module.exports = {
 
@@ -128,7 +128,7 @@ module.exports = {
 	"3324"   :	"Boiler, Tank, and Shipping Container Manufacturing",
 	"3325"   :	"Hardware Manufacturing",
 	"3326"   :	"Spring and Wire Product Manufacturing",
-	"3327"   :	"Machine Shops; Turned Product; and Screw, Nut, and Bolt Manufacturing",
+	"3327"   :	"Machine Shops Turned Product and Screw, Nut, and Bolt Manufacturing",
 	"3328"   :	"Coating, Engraving, Heat Treating, and Allied Activities",
 	"3329"   :	"Other Fabricated Metal Product Manufacturing",
 	"333"    :	"Machinery Manufacturing",
@@ -439,5 +439,5 @@ module.exports = {
 	"9281"   :	"National Security and International Affairs",
 	"99"     :	"Other",
 
-};
+}
 
