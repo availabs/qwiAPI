@@ -9,6 +9,8 @@ const validateRequestedCategories = require('./src/services/CategoryValidationSe
 const validateRequestedMeasures = require('./src/services/MeasureValidationService').validateRequestedMeasures
 const buildSQLString = require('./src/builders/SQLStringBuilder').buildSQLString
 
+const runQuery = require('./src/services/DBService').runQuery
+
 
 const getTableName = require('./src/services/TableService').getTableName
 
@@ -60,8 +62,14 @@ app.get('/*', (req, res) => {
     let tableName = getTableName(requestedCategoryNames) 
 
     let sqlString = buildSQLString(tableName, requestedCategories, requestedMeasures)
-    
-    return res.status(200).send(sqlString)
+
+    runQuery(sqlString, (err, result) => {
+        if (err) {
+            return req.status(500).send(err)
+        } else {
+            return res.status(200).send(sqlString)
+        }
+    })
 })
 
 
