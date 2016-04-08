@@ -1,0 +1,9 @@
+docker/
+data/
+postgres_volume/
+node_modules/
+.git/
+.tern-project
+.eslintrc.js
+.dockerignore
+.gitignore

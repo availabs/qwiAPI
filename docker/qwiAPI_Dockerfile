@@ -1,0 +1,20 @@
+FROM ubuntu:16.04
+MAINTAINER Paul Tomchik
+
+RUN apt-get update
+RUN apt-get -y upgrade 
+RUN apt-get install -y npm git wget
+
+RUN npm install -g n
+RUN n lts
+RUN npm install -g npm
+
+ADD . /qwiAPI/
+
+VOLUME "/data/"
+
+RUN cd /qwiAPI/ && npm install --production
+
+EXPOSE 10101
+
+CMD node /qwiAPI/app.js
