@@ -3,9 +3,20 @@
 
 'use strict'
 
-var pg = require('pg')
+const pg = require('pg')
 
-var conString = "postgres://postgres:1234@localhost/postgres"
+// postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
+const conString = (() => {
+    const process = require('process')
+
+    let user   = process.env.POSTGRES_USER || 'postgres'
+    let passwd = process.env.POSTGRES_PASSWORD || ''
+    let netloc = process.env.POSTGRES_NETLOC || 'localhost'
+    let port   = process.env.POSTGRES_PORT || ''
+    let dbname = process.env.POSTGRES_DB || 'qwiAPI'
+
+    return 'postgresql://' + user + (passwd && (':' + passwd)) +'@'+ netloc + (port && (':' + port)) +'/'+ dbname
+})()
 
 
 function runQuery (query, callback) {
@@ -50,4 +61,6 @@ function runQuery (query, callback) {
     })
 }
 
-
+module.exports = {
+    runQuery : runQuery
+}

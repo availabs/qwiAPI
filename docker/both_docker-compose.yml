@@ -1,0 +1,20 @@
+version: '2'
+services:
+    nodejs:
+      image: avail/qwi-api-server
+      build:
+          context: "../"
+          dockerfile: "./qwiAPI_Dockerfile"
+      ports:
+          - "10101:10101"
+      links:
+        - postgres
+      env_file: 
+          - "../config/node_server.env"
+          - "../config/postgres_db.env"
+        
+    postgres:
+      image: postgres:9.5
+      volumes:
+        - ./pg_data:/data
+      env_file: "../config/postgres_db.env"

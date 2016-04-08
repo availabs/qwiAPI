@@ -5,6 +5,11 @@ const app = require('express')()
 const _ = require('lodash')
 
 
+const env = require('node-env-file')
+env(__dirname + '/config/node_server.env')
+env(__dirname + '/config/postgres_db.env')
+
+
 const validateRequestedCategories = require('./src/services/CategoryValidationService').validateRequestedCategories
 const validateRequestedMeasures = require('./src/services/MeasureValidationService').validateRequestedMeasures
 const buildSQLString = require('./src/builders/SQLStringBuilder').buildSQLString
@@ -72,9 +77,9 @@ app.get('/data/*', (req, res) => {
 
     runQuery(sqlString, (err, result) => {
         if (err) {
-            return req.status(500).send(err)
+            return res.status(500).send(err)
         } else {
-            return res.status(200).send(sqlString)
+            return res.status(200).send(result)
         }
     })
 })

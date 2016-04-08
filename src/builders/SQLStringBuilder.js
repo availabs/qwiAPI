@@ -136,7 +136,7 @@ function buildSQLString (tableName, reqCategoriesWithConds, requestedMeasures) {
     
     let categoryNames = Object.keys(categoriesWithConds)
 
-    let toProject = _.concat(categoryNames, requestedMeasures)
+    let toProject = _.concat(categoryNames, requestedMeasures).filter(k => k)
 
     let defaults = getDefaults(tableName, categoriesWithConds)
 
