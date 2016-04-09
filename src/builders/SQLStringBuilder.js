@@ -145,10 +145,12 @@ function buildSQLString (tableName, reqCategoriesWithConds, requestedMeasures) {
 
     return  'SELECT ' + toProject.join(', ') + '\n' +
             'FROM '   + tableName + '\n' + 
-            'WHERE ' + _.map(predicates, (filterValArray, category) => 
-                        ('(' + ((filterValArray.length) ?
-                             (filterValArray.map(val => ('(' + category + ' = ' + val + ')')).join(' OR ')) :
-                             (category + ' <> ' + aggregationCategoryDefaults[category])) + ')')
+            'WHERE ' + _.map(predicates, (filterValArray, category) => (
+                          '(' + 
+                           ((filterValArray.length) ?
+                             (filterValArray.map(val => `(${category} = '${val}')`).join(' OR ')) :
+                             `${category} <> '${aggregationCategoryDefaults[category]})`) +
+                          ')')
             ).join(' AND \n') + ';'
 }
 
