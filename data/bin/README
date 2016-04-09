@@ -1,0 +1,15 @@
+Execute the scripts in the folloing order:
+
+    1) Create-qwi-Database.sh
+    2) Create-qwi_api-User.sh
+    3) Download-And-Load_QWI_CSV-File.sh*  
+
+
+NOTES:
+    Create-qwi-Database.sh will first _DELETE_THE_ENTIRE_DATABASE_, if it exists.
+
+    Create-qwi-Database.sh and Create-qwi_api-User.sh have a POSTGRES_USER variable to set.
+
+    Also, Create-qwi-Database.sh may require revision based on your Postgres setup.
+
+    Download-And-Load_QWI_CSV-File.sh is configurable.

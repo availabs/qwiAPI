@@ -9,8 +9,13 @@
   "author": "Paul Tomchik",
   "license": "MIT",
   "dependencies": {
+    "async": "^2.0.0-rc.3",
+    "body-parser": "^1.15.0",
     "express": "^4.13.4",
+    "iconv": "^2.1.11",
     "lodash": "^4.8.2",
-    "node-env-file": "^0.1.8"
+    "node-env-file": "^0.1.8",
+    "pg": "^4.5.2",
+    "pg-copy-streams": "^0.3.0"
   }
 }
