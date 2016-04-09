@@ -43,10 +43,10 @@ module.exports = {
         }
 
         // Firm characteristics
-        if (reqCatObj.firmage) {
-            tableName += '_fa'
-        } else {
+        if (reqCatObj.firmsize) {
             tableName += '_fs'
+        } else {
+            tableName += '_fa'
         }
 
         return (tableName + '_gm_ns_op_u')

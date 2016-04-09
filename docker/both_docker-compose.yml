@@ -14,8 +14,7 @@ services:
           - "../config/postgres_db.env"
         
     postgres:
-        #image: postgres:9.5
-      image: paul/mypostgres
+      image: postgres:9.5
       volumes:
         - ./pg_data:/data
         - ../data/bin/:/init_scripts

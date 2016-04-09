@@ -37,6 +37,8 @@ const firmCategories = [
 const otherCategories = [
     'geography',
     'industry',
+    'year',
+    'quarter',
 ]
 
 const supportedCategories = _.concat(workerCategories, firmCategories, otherCategories)

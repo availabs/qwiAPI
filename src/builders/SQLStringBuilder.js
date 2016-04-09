@@ -12,10 +12,12 @@ const codeLengths = {
     ethnicity : 1,
     firmage   : 1,
     firmsize  : 1,
-    geography : 5,
+    geography : 7,
     industry  : 2,
     race      : 1,
     sex       : 1,
+    year      : 4,
+    quarter   : 1,
 }
 
 
@@ -112,7 +114,7 @@ function getDefaults (tableName, categoriesWithConditions) {
 function buildSQLString (tableName, reqCategoriesWithConds, requestedMeasures) {
     
     // Builds a map of "category" -> [filter values]
-    var categoriesWithConds = reqCategoriesWithConds.reduce((acc, cat) => {
+    let categoriesWithConds = reqCategoriesWithConds.reduce((acc, cat) => {
         let m = cat.match(/\d+/)
             
         let catName = (m) ? cat.substring(0, m.index) : cat
@@ -142,16 +144,36 @@ function buildSQLString (tableName, reqCategoriesWithConds, requestedMeasures) {
 
     let predicates = _.merge(categoriesWithConds, defaults)
 
+    toProject = _.uniq(toProject.concat(['geography', 'year', 'quarter']))
 
     return  'SELECT ' + toProject.join(', ') + '\n' +
             'FROM '   + tableName + '\n' + 
-            'WHERE ' + _.map(predicates, (filterValArray, category) => (
-                          '(' + 
-                           ((filterValArray.length) ?
-                             (filterValArray.map(val => `(${category} = '${val}')`).join(' OR ')) :
-                             `${category} <> '${aggregationCategoryDefaults[category]})`) +
-                          ')')
-            ).join(' AND \n') + ';'
+            'WHERE ' + 
+                _.map(predicates, (filterValArray, category) => {
+
+                    // For geographies, we do a prefix match
+                    // This allows us to get all the metro-level data for a state, for example.
+                    if ((category === 'geography') && (filterValArray.length)) {
+                        // For prefix matching, we remove the zero padding if it exists.
+                        // Because some state fips codes start with zero, we remove
+                        // the leading zeros iff there is more than leading zero.
+                        // If we remove leading zeros, we must take care not to remove the leading 
+                        // zero of the padded fips code.
+                        let codes = filterValArray.map(code => code.replace(/^0{2,5}/, ''))
+                        return '(' +  codes.map(code => `(${category} LIKE '${code}%')`).join(' OR ') + ')'
+                    }
+
+                    // Years and quarters are numeric data types in the table.
+                    if ((category === 'year') || (category === 'quarter')) {
+                        return '(' + filterValArray.map(val => `(${category} = ${val})`).join(' OR ') + ')'
+                    }
+
+                    return '(' + ((filterValArray.length) ?
+                                    (filterValArray.map(val => `(${category} = '${val}')`).join(' OR ')) :
+                                     `${category} <> '${aggregationCategoryDefaults[category]}'`) + ')'
+
+                }).join(' AND \n') + 
+            ';'
 }
 
 
