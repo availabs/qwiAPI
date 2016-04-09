@@ -49,7 +49,7 @@ app.post('/admin/database/tables/create', (req, res) => {
                    'Lock currently held by ' + DDL_lock.message
         })
     } else {
-        DDL_lock = '/admin/database/tables/create... in progress'
+        DDL_lock = { message: '/admin/database/tables/create... in progress' }
     }
 
     return createTables((err, result) => {
