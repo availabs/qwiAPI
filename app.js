@@ -9,6 +9,7 @@ envFile(__dirname + '/config/qwi.env')
 
 const env = require('process').env
 
+
 const app = require('express')()
 const bodyParser = require('body-parser')
 const _ = require('lodash')
@@ -20,8 +21,9 @@ const buildSQLString = require('./src/builders/SQLStringBuilder').buildSQLString
 const createTables = require('./src/services/DBService.js').createTables
 const loadLabels = require('./src/services/DBService.js').loadLabels
 const loadStatesData = require('./src/services/DBService.js').loadStatesData
-const loadAll = require('./src/services/DBService.js').loadAll
+const loadAllStates = require('./src/services/DBService.js').loadAllStates
 const runQuery = require('./src/services/DBService').runQuery
+const getUploadedStates = require('./src/services/DBService').getUploadedStates
 const getTableName = require('./src/services/TableService').getTableName
 
 
@@ -42,13 +44,16 @@ app.post('/admin/database/tables/create', (req, res) => {
     }
 
     if (DDL_lock) {
-        return res.status(503).send({ error: 'Only one DDL operation request allowed at a time. Try again later.' })
+        return res.status(503).send({ 
+            error: 'Only one DDL operation request allowed at a time.\n' + 
+                   'Lock currently held by ' + DDL_lock.message
+        })
     } else {
-        DDL_lock = 1
+        DDL_lock = '/admin/database/tables/create... in progress'
     }
 
     return createTables((err, result) => {
-        DDL_lock = 0
+        DDL_lock = null
         if (err) {
             console.log(err.stack)
             return res.status(500).send({ error: err })
@@ -66,12 +71,16 @@ app.post('/admin/database/tables/load/labels', (req, res) => {
     }
 
     if (DDL_lock) {
-        return res.status(503).send({ error: 'Only one DDL operation request allowed at a time. Try again later.' })
+        return res.status(503).send({ 
+            error: 'Only one DDL operation request allowed at a time.\n' + 
+                   'Lock currently held by ' + DDL_lock.message
+        })
     } else {
-        DDL_lock = 1
+        DDL_lock = { message: '/admin/database/tables/load/labels... in progress' }
     }
 
     return loadLabels((err, result) => {
+        DDL_lock = null
         if (err) {
             console.log(err.stack)
             return res.status(500).send({ error: err })
@@ -83,21 +92,25 @@ app.post('/admin/database/tables/load/labels', (req, res) => {
 
 
 app.post('/admin/database/tables/load/states', (req, res) => {
-   
+
     if (adminPasswd && (adminPasswd !== (req.body.password || req.query.password))) {
         return res.status(403).send({ error: 'admin/* routes require a vaild password in the body or query params.' })
     }
 
-    if (DDL_lock) {
-        return res.status(503).send({ error: 'Only one DDL operation request allowed at a time. Try again later.' })
-    } else {
-        DDL_lock = 1
-    }
-
     let states = req.body.states
 
-    return loadStatesData(states, (err, result) => {
-        DDL_lock = 0
+    if (DDL_lock) {
+        return res.status(503).send({ 
+            error: 'Only one DDL operation request allowed at a time.\n' + 
+                   'Lock currently held by ' + DDL_lock.message
+        })
+    } else {
+        DDL_lock = { message: ('/admin/database/tables/load/states:' + JSON.stringify(states) + '... in progress') }
+    }
+
+
+    return loadStatesData(states, DDL_lock, (err, result) => {
+        DDL_lock = null
         if (err) {
             console.log(err.stack)
             return res.status(500).send({ error: err })
@@ -107,32 +120,54 @@ app.post('/admin/database/tables/load/states', (req, res) => {
     })
 })
 
+app.get('/admin/status', (req, res) => {
 
-app.post('/admin/database/tables/load/all', (req, res) => {
+    if (adminPasswd && (adminPasswd !== (req.query.password))) {
+        return res.status(403).send({ 
+            error: 'admin/* routes require a vaild password in the body or query params.' })
+    }
+
+    res.status(200).send((DDL_lock && DDL_lock.message) || 'No work in progress.')
+})
+
+app.post('/admin/database/tables/load/states/all', (req, res) => {
    
     if (adminPasswd && (adminPasswd !== (req.body.password || req.query.password))) {
         return res.status(403).send({ error: 'admin/* routes require a vaild password in the body or query params.' })
     }
 
     if (DDL_lock) {
-        return res.status(503).send({ error: 'Only one DDL operation request allowed at a time. Try again later.' })
+        return res.status(503).send({ 
+            error: 'Only one DDL operation request allowed at a time.\n' + 
+                   'Lock currently held by ' + DDL_lock.message
+        })
     } else {
-        DDL_lock = 1
+        DDL_lock = '/admin/database/tables/load/states/all... in progress'
     }
 
     res.status(200).send({ message: "Starting to load ALL data. This will take a few hours." })
 
     console.time('/admin/database/tables/load/all')
-    return loadAll((err, result) => {
-        DDL_lock = 0
-        console.timeEnd('/admin/database/tables/load/all')
+
+    return loadAllStates(DDL_lock, (err, result) => {
+        DDL_lock = null
         if (err) {
             console.error(err.stack)
         }
+        console.timeEnd('/admin/database/tables/load/all')
     })
 })
 
 
+app.get('/metadata/uploaded/states', (req, res) => {
+     getUploadedStates((err, result) => {
+        if (err) {
+            return res.status(500).send(err)
+        } else {
+            return res.status(200).send({ data: result })
+        }
+    })
+})
 
 
 
@@ -182,7 +217,7 @@ app.get('/data/*', (req, res) => {
         if (err) {
             return res.status(500).send(err)
         } else {
-            return res.status(200).send(result)
+            return res.status(200).send({ data: result.rows })
         }
     })
 })

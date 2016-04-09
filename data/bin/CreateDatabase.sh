@@ -20,7 +20,7 @@ fi
 
 #echo "Create the QWI data directory."
 mkdir -p "${PGDATA}/${POSTGRES_DB}/"
-${POSTGRES_HOME}/bin/initdb -D "${PGDATA}/${POSTGRES_DB}/"
+${POSTGRES_HOME}/bin/initdb --encoding="UTF8" -D "${PGDATA}/${POSTGRES_DB}/"
 
 #echo "Starting up Postgres in background."
 ${POSTGRES_HOME}/bin/postgres -D "${PGDATA}/${POSTGRES_DB}/" &

@@ -6,6 +6,8 @@ const zlib = require('zlib')
 const async = require('async')
 const pg = require('pg')
 const copyFrom = require('pg-copy-streams').from
+const Iconv = require('iconv').Iconv
+const _ = require('lodash')
 
 const env = require('process').env
       
@@ -27,6 +29,8 @@ const conString = (() => {
 
 const censusBaseURL = "http://lehd.ces.census.gov/pub/"
 const aggregation = 'gm_ns_op_u'
+
+const loadedStateCodesQuery = "SELECT geography FROM label_geography WHERE char_length(geography) = 2;" 
 
 const attributes = [
     'agegrp',
@@ -61,6 +65,59 @@ const genericLabelTables = [
     'label_sex',
 ]
 
+const stateToCode = {
+   '01' : 'al',
+   '02' : 'ak',
+   '04' : 'az',
+   '05' : 'ar',
+   '06' : 'ca',
+   '08' : 'co',
+   '09' : 'ct',
+   '10' : 'de',
+   '11' : 'dc',
+   '12' : 'fl',
+   '13' : 'ga',
+   '15' : 'hi',
+   '16' : 'id',
+   '17' : 'il',
+   '18' : 'in',
+   '19' : 'ia',
+   '20' : 'ks',
+   '21' : 'ky',
+   '22' : 'la',
+   '23' : 'me',
+   '24' : 'md',
+   '25' : 'ma',
+   '26' : 'mi',
+   '27' : 'mn',
+   '28' : 'ms',
+   '29' : 'mo',
+   '30' : 'mt',
+   '31' : 'ne',
+   '32' : 'nv',
+   '33' : 'nh',
+   '34' : 'nj',
+   '35' : 'nm',
+   '36' : 'ny',
+   '37' : 'nc',
+   '38' : 'nd',
+   '39' : 'oh',
+   '40' : 'ok',
+   '41' : 'or',
+   '42' : 'pa',
+   '44' : 'ri',
+   '45' : 'sc',
+   '46' : 'sd',
+   '47' : 'tn',
+   '48' : 'tx',
+   '49' : 'ut',
+   '50' : 'vt',
+   '51' : 'va',
+   '53' : 'wa',
+   '54' : 'wv',
+   '55' : 'wi',
+   '56' : 'wy',
+}
 //const workerCharacteristics = ['sa', 'se', 'rh']
 const workerCharacteristics = ['sa']
 
@@ -210,22 +267,31 @@ const loadLabels = callback => {
     return async.parallel(loaders, callback)
 }
 
-const loadStatesData = (states, callback) => {
+const loadStatesData = (states, DDL_lock, callback) => {
 
     if (!Array.isArray(states)) {
         states = [states]
     }
 
+    states = states.map(s => s.toLowerCase().trim())
+
     // We need to handle the state geography labels differently.
     let loadGeoLabels = (state, cb) => {
 
         let url = censusBaseURL + `${state}/` + env.QWI_RELEASE + '/DVD-se_fa/label_geography.csv'
+        console.log('Loading geography labels for', state)
 
         pg.connect(conString, function(err, client, done) {
-            var stream = client.query(copyFrom(`COPY label_geography FROM STDIN DELIMITER ',' CSV HEADER`))
+            let stream = client.query(copyFrom(`COPY label_geography 
+                                                FROM STDIN 
+                                                DELIMITER ',' 
+                                                CSV HEADER 
+                                                ENCODING 'UTF8'`))
+            let iconv = new Iconv('ISO-8859-1', 'UTF-8')
+
 
             http.request(url, res => {
-                res.pipe(stream)
+                res.pipe(iconv).pipe(stream)
                    .on('finish', () => { 
                        done()
                        return cb(null) 
@@ -233,6 +299,7 @@ const loadStatesData = (states, callback) => {
                    .on('error', (err) => { 
                        if (err) { 
                            done()
+                           console.error('\n', url, '\n', err.stack) 
                            return cb(err) 
                        }
                    })
@@ -248,33 +315,63 @@ const loadStatesData = (states, callback) => {
 
         let url = `${censusBaseURL}/${state}/${env.QWI_RELEASE }/DVD-${workerC}_${firmC}/qwi_${state}_${fileName}`
 
+        console.log('Loading data for', state, 'into', tableName)
+
+        let timerLabel = state + ' -> ' + tableName
+        console.time(timerLabel)
+
         return pg.connect(conString, function(err, client, done) {
             let stream = client.query(copyFrom(`COPY ${tableName} FROM STDIN DELIMITER ',' CSV HEADER`))
             let gunzipper = zlib.createGunzip()
 
-
             return http.request(url, res => {
                 res.pipe(gunzipper)
                    .pipe(stream)
-                   .on('finish', () => { done(); return cb(null) })
-                   .on('error', (err) => { done(); return cb(err) })
+                   .on('finish', () => { 
+                       done() 
+                       console.timeEnd(timerLabel)
+                       DDL_lock.message += `\n${state} loaded into ${tableName}.`
+                       return cb(null) 
+                   })
+                   .on('error', (err) => { 
+                       done() 
+                       console.timeEnd(timerLabel)
+                       DDL_lock.message += `\nERROR while loading ${state} into ${tableName}.`
+                       return cb(err) 
+                   })
             }).end()
         })
     }
 
-    let geoLabelLoaders = states.map(state => loadGeoLabels.bind(null, state))
 
-    let dataLoaders = states.reduce((acc, state) => {
-        for (let i = 0; i < workerCharacteristics.length; ++i) {
-            for (let j = 0; j < firmCharacteristics.length; ++j) {
-                acc.push(loadData.bind(null, state, workerCharacteristics[i], firmCharacteristics[j], aggregation))
-            }
+
+    return getUploadedStates((err, res) => {
+
+        if (err) { return callback(err) }
+
+        let dupeStates = _.intersection(states, res)
+
+        if (dupeStates.length) {
+            DDL_lock.message += '\nThe following states aleady were uploaded: ' + JSON.stringify(dupeStates) + '.'
+            console.warn('The following states aleady were uploaded:', dupeStates)
         }
-        return acc 
-    }, [])
 
-    // Don't want to anger the host, so we'll do serial.
-    return async.series(geoLabelLoaders.concat(dataLoaders), callback)
+        states = _.difference(states, res)
+
+        let geoLabelLoaders = states.map(state => loadGeoLabels.bind(null, state))
+
+        let dataLoaders = states.reduce((acc, state) => {
+            for (let i = 0; i < workerCharacteristics.length; ++i) {
+                for (let j = 0; j < firmCharacteristics.length; ++j) {
+                    acc.push(loadData.bind(null, state, workerCharacteristics[i], firmCharacteristics[j], aggregation))
+                }
+            }
+            return acc 
+        }, [])
+
+        // Don't want to anger the host, so we'll do serial.
+        return async.series(geoLabelLoaders.concat(dataLoaders), callback)
+    })
 }
 
 /* code based on example found here: https://github.com/brianc/node-postgres/wiki/Example */
@@ -320,10 +417,20 @@ function runQuery (query, callback) {
     })
 }
 
+const getUploadedStates = (cb => 
+    runQuery(loadedStateCodesQuery, (e,res) => (e) ? cb(e) : cb(null, res.rows.map(r => stateToCode[r.geography]))))
+
+const loadAllStates = loadStatesData.bind(null, _.values(stateToCode))
+
 
 module.exports = {
     runQuery       : runQuery ,
     createTables   : createTables ,
     loadLabels     : loadLabels ,
     loadStatesData : loadStatesData ,
+    loadAllStates  : loadAllStates ,
+    getUploadedStates : getUploadedStates ,
 }
+
+
+
