@@ -118,11 +118,12 @@ const stateToCode = {
    '55' : 'wi',
    '56' : 'wy',
 }
-//const workerCharacteristics = ['sa', 'se', 'rh']
-const workerCharacteristics = ['sa']
 
-//const firmCharacteristics = ['fa', 'fs']
-const firmCharacteristics = ['fa']
+const workerCharacteristics = ['sa', 'se', 'rh']
+//const workerCharacteristics = ['sa']
+
+const firmCharacteristics = ['fa', 'fs']
+//const firmCharacteristics = ['fa']
 
 const qwiTableFields = `
 	periodicity   char(1),  /* Periodicity of report */

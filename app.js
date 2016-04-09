@@ -108,14 +108,13 @@ app.post('/admin/database/tables/load/states', (req, res) => {
         DDL_lock = { message: ('/admin/database/tables/load/states:' + JSON.stringify(states) + '... in progress') }
     }
 
+    return res.status(200).send({ message: "Task started. Poll /admin/status for progress." })
 
     return loadStatesData(states, DDL_lock, (err, result) => {
         DDL_lock = null
         if (err) {
             console.log(err.stack)
-            return res.status(500).send({ error: err })
         } else {
-            return res.status(200).send({ message: result })
         }
     })
 })
