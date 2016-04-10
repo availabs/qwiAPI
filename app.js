@@ -139,7 +139,7 @@ app.post('/admin/database/tables/load/states/all', (req, res) => {
                    'Lock currently held by ' + DDL_lock.message
         })
     } else {
-        DDL_lock = '/admin/database/tables/load/states/all... in progress'
+        DDL_lock = { message: '/admin/database/tables/load/states/all... in progress' }
     }
 
     res.status(200).send({ message: "Starting to load ALL data. This will take a few hours." })
