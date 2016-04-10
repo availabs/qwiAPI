@@ -92,7 +92,6 @@ app.post('/admin/database/tables/load/labels', (req, res) => {
 
 
 app.post('/admin/database/tables/load/states', (req, res) => {
-
     if (adminPasswd && (adminPasswd !== (req.body.password || req.query.password))) {
         return res.status(403).send({ error: 'admin/* routes require a vaild password in the body or query params.' })
     }
@@ -108,14 +107,13 @@ app.post('/admin/database/tables/load/states', (req, res) => {
         DDL_lock = { message: ('/admin/database/tables/load/states:' + JSON.stringify(states) + '... in progress') }
     }
 
-    return res.status(200).send({ message: "Task started. Poll /admin/status for progress." })
+    res.status(200).send({ message: "Task started. Poll /admin/status for progress." })
 
-    return loadStatesData(states, DDL_lock, (err, result) => {
+    return loadStatesData(states, DDL_lock, (err) => {
         DDL_lock = null
         if (err) {
             console.log(err.stack)
-        } else {
-        }
+        } 
     })
 })
 
