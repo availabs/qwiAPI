@@ -6,7 +6,7 @@ const zlib = require('zlib')
 const async = require('async')
 const pg = require('pg')
 const copyFrom = require('pg-copy-streams').from
-const Iconv = require('iconv').Iconv
+const iconv = require('iconv-lite')
 const _ = require('lodash')
 
 const env = require('process').env
@@ -288,11 +288,12 @@ const loadStatesData = (states, DDL_lock, callback) => {
                                                 DELIMITER ',' 
                                                 CSV HEADER 
                                                 ENCODING 'UTF8'`))
-            let iconv = new Iconv('ISO-8859-1', 'UTF-8')
 
 
             http.request(url, res => {
-                res.pipe(iconv).pipe(stream)
+                res.pipe(iconv.decodeStream('iso-8859-1'))
+                   .pipe(iconv.encodeStream('utf8'))
+                   .pipe(stream)
                    .on('finish', () => { 
                        done()
                        return cb(null) 
