@@ -6,13 +6,13 @@ envFile(__dirname + '/config/node_server.env')
 envFile(__dirname + '/config/postgres_db.env')
 envFile(__dirname + '/config/qwi.env')
 
-
 const env = require('process').env
-
 
 const app = require('express')()
 const bodyParser = require('body-parser')
-const _ = require('lodash')
+
+
+console.log('WTF----------------------------------------')
 
 
 const validateRequestedCategories = require('./src/services/CategoryValidationService').validateRequestedCategories
@@ -146,7 +146,7 @@ app.post('/admin/database/tables/load/states/all', (req, res) => {
 
     console.time('/admin/database/tables/load/all')
 
-    return loadAllStates(DDL_lock, (err, result) => {
+    return loadAllStates(DDL_lock, (err) => {
         DDL_lock = null
         if (err) {
             console.error(err.stack)

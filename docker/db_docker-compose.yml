@@ -6,4 +6,5 @@ services:
           - "5433:5432"
       volumes:
         - ./pg_data:/data
+        - ../data/bin/:/init_scripts
       env_file: "../config/postgres_db.env"

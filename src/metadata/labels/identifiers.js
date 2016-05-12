@@ -1,0 +1,18 @@
+module.exports = {
+	'periodicity'   :  'Periodicity of report',
+	'seasonadj'     :  'Seasonal Adjustment Indicator',
+	'geo_level'     :  'Group: Geographic level of aggregation',
+	'geography'     :  'Group: Geography code',
+	'ind_level'     :  'Group: Industry level of aggregation',
+	'industry'      :  'Group: Industry code',
+	'ownercode'     :  'Group: Ownership group code',
+	'sex'           :  'Group: Gender code',
+	'agegrp'        :  'Group: Age group code (WIA)',
+	'race'          :  'Group: race',
+	'ethnicity'     :  'Group: ethnicity',
+	'education'     :  'Group: education',
+	'firmage'       :  'Group: Firm Age group',
+	'firmsize'      :  'Group: Firm Size group',
+	'year'          :  'Time: Year',
+	'quarter'       :  'Time: Quarter',
+}
