@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-N=10
+N=10000
 
 for f in $(ls ./.metros_all);
 do

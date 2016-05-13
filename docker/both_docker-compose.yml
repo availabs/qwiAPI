@@ -4,7 +4,7 @@ services:
       image: avail/qwi-api-server
       build:
           context: "../"
-          dockerfile: "./qwiAPI_Dockerfile"
+          dockerfile: "./docker/qwiAPI_Dockerfile"
       ports:
           - "10101:10101"
       links:

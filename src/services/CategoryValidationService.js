@@ -17,17 +17,11 @@ Only certain combinations of demographic and firm categories are valid. This is 
 
 const _ = require('lodash')
 
+
 const demographicCategories = require('../metadata/aggregationCategories/demographic')
 const firmCategories = require('../metadata/aggregationCategories/firm')
 
-const otherSupportedCategories = [
-    'geography',
-    'industry',
-    'year',
-    'quarter',
-]
-
-const supportedCategories = _.concat(demographicCategories, firmCategories, otherSupportedCategories)
+const queryableCategories = require('../metadata/queryableCategories')
 
 const validWorkerCategoryCombinations = [
   ['agegrp',    'sex'],
@@ -47,7 +41,7 @@ const pairwise = (list) => {
 
 
 const verifyCategoriesSupported = (categories) => {
-    let unsupportedCategories = _.difference(categories, supportedCategories)
+    let unsupportedCategories = _.difference(categories, queryableCategories)
 
     if (unsupportedCategories.length) {
         'The following requested categor' + 
@@ -60,7 +54,7 @@ const verifyCategoriesSupported = (categories) => {
 // The following function makes sure the requested category combination is supported by the dataset.
 const validateWorkerCharacteristicCombinations = (reqCategories) => {
 
-    let reqWorkerCategories = reqCategories.intersect(demographicCategories).sort()
+    let reqWorkerCategories = _.intersection(reqCategories, demographicCategories).sort()
      
     let invalidCombos = _.differenceWith(pairwise(reqWorkerCategories), validWorkerCategoryCombinations, _.equals) 
 
@@ -81,7 +75,7 @@ const validateFirmCharacteristicCombinations = (categories) => {
 
 
 const allValidators = [
-  verifyCategoriesSupported.bind,
+  verifyCategoriesSupported,
   validateWorkerCharacteristicCombinations,
   validateFirmCharacteristicCombinations,
 ]
@@ -90,7 +84,7 @@ const allValidators = [
 const validateRequestedCategories = (categories, callback) => {
   let errorMessage = allValidators.map(validator => validator(categories)).filter(e => e).join('\n')
 
-  callback(errorMessage || null)
+  callback(errorMessage ? new Error(errorMessage) : null)
 }
 
 

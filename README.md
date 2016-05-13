@@ -13,3 +13,6 @@ Configuration via env variables. Look in config/ to see the defaults. Note: if s
 Needs try/catch blocks throughout codebase. Currently very brittle.
 
 Index building route on the way.
+
+Example Queries:
+http://localhost:10101/data/?fields=emp

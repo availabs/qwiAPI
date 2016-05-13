@@ -89,7 +89,12 @@ function getDefaults (tableName, categoriesWithConditions) {
 /**
  * The reqCatWithConds parameter is an array strings representing category names followed by the numeric filters.
  */
-function buildSQLString (tableName, reqCategoriesWithConds, requestedMeasures) {
+function buildSQLString (tableName, reqCategoriesWithConds, requestedIndicators) {
+
+console.log(tableName)
+console.log(reqCategoriesWithConds)
+console.log(requestedIndicators)
+
     
     // Builds a map of "category" -> [filter values]
     let categoriesWithConds = reqCategoriesWithConds.reduce((acc, cat) => {
@@ -116,13 +121,15 @@ function buildSQLString (tableName, reqCategoriesWithConds, requestedMeasures) {
     
     let categoryNames = Object.keys(categoriesWithConds)
 
-    let toProject = _.concat(categoryNames, requestedMeasures).filter(k => k)
+    let toProject = _.concat(categoryNames, requestedIndicators).filter(k => k)
 
     let defaults = getDefaults(tableName, categoriesWithConds)
 
     let predicates = _.merge(categoriesWithConds, defaults)
 
     toProject = _.uniq(toProject.concat(['geography', 'year', 'quarter']))
+
+
 
     return  'SELECT ' + toProject.join(', ') + '\n' +
             'FROM '   + tableName + '\n' + 
@@ -149,7 +156,6 @@ function buildSQLString (tableName, reqCategoriesWithConds, requestedMeasures) {
                     return '(' + ((filterValArray.length) ?
                                     (filterValArray.map(val => `(${category} = '${val}')`).join(' OR ')) :
                                      `${category} <> '${aggregationCategoryDefaults[category]}'`) + ')'
-
                 }).join(' AND \n') + 
             ';'
 }

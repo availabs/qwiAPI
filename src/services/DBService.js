@@ -37,14 +37,13 @@ function runQuery (query, callback) {
         // record the visit
         client.query(query, function(err, result) {
 
-console.log(query)
             // handle an error from the query
             if(handleError(err)) { 
                 return callback(err)
             }
 
             // return the client to the connection pool for other requests to reuse
-            done(client) //TODO: Test
+            done()
             
             return callback(null, result)
         })
@@ -52,13 +51,13 @@ console.log(query)
 }
 
 
+// Used in the database initialization scripts.
 const end = () => {
-  console.log('++++ END ++++')
   pg.end()
 }
 
 
 module.exports = {
-    runQuery : runQuery ,
+    runQuery : runQuery,
     end      : end,
 }

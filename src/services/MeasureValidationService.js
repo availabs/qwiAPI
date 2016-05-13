@@ -11,18 +11,19 @@ const supportedIndicators = Object.keys(indicatorLabels).map(l => l.toLowerCase(
 
 
 
-const validateRequestedIndicators = requestedIndicators => {
+const validateRequestedIndicators = (requestedIndicators, callback) => {
     
     let unsupportedIndicators = _.difference(requestedIndicators, supportedIndicators)
 
     if (unsupportedIndicators.length) {
-        throw new Error(
+        return callback(new Error(
             'The following requested indicator' + 
                 ((unsupportedIndicators.length > 1) ? 's are ' : ' is ') +
-                'not recognized: [' + unsupportedIndicators.join(', ') + '].\n')
+                'not recognized: [' + unsupportedIndicators.join(', ') + '].\n'))
     } 
-}
 
+    callback(null)
+}
 
 
 module.exports = {
