@@ -20,39 +20,36 @@ const conString = (() => {
  //code based on example found here: https://github.com/brianc/node-postgres/wiki/Example 
 function runQuery (query, callback) {
 
-console.log('\n\n')
-console.log(query)
-console.log('\n\n')
+  console.log(query)
 
+  // get a pg client from the connection pool
+  return pg.connect(conString, function(err, client, done) {
 
-    // get a pg client from the connection pool
-    return pg.connect(conString, function(err, client, done) {
+      var handleError = function(err) {
+          if(!err) { return false }
 
-        var handleError = function(err) {
-            if(!err) { return false }
+          if(client){ done(client) }
 
-            if(client){ done(client) }
+          return true
+      }
 
-            return true
-        }
+      // handle an error from the connection
+      if(handleError(err)) { return callback(err) }
 
-        // handle an error from the connection
-        if(handleError(err)) { return callback(err) }
+      // record the visit
+      client.query(query, function(err, result) {
 
-        // record the visit
-        client.query(query, function(err, result) {
+          // handle an error from the query
+          if(handleError(err)) { 
+              return callback(err)
+          }
 
-            // handle an error from the query
-            if(handleError(err)) { 
-                return callback(err)
-            }
-
-            // return the client to the connection pool for other requests to reuse
-            done()
-            
-            return callback(null, result)
-        })
-    })
+          // return the client to the connection pool for other requests to reuse
+          done()
+          
+          return callback(null, result)
+      })
+  })
 }
 
 

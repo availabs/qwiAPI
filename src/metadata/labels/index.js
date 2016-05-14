@@ -4,5 +4,5 @@ module.exports = {
   indicators            : require('./indicators'),
   status_flag_values    : require('./status_flag_values'),
   status_flags          : require('./status_flags'),
-  __source              : require('./source'),
+  _source               : require('./_source'),
 }
