@@ -17,6 +17,8 @@ const argv = require('minimist')(process.argv.slice(2))
 const async = require('async')
 const pg = require('pg')
 const copyFrom = require('pg-copy-streams').from
+pg.on('error', (err) => console.log('\n\n', err.stack))
+
 const _ = require('lodash')
 
 const projectRoot = path.join(__dirname, '../../')
@@ -25,7 +27,6 @@ const envFile = require('node-env-file')
 envFile(path.join(projectRoot, 'config/postgres_db.env'))
 envFile(path.join(projectRoot, 'config/qwi.env'))
 
-const dataDir = path.join(projectRoot, 'data/metros')
 
 const dbService = require(path.join(projectRoot, 'src/services/DBService'))
 
@@ -37,14 +38,9 @@ const stateAbbrvToCode = require(path.join(projectRoot, 'src/metadata/geographic
 const statesToUpload = (argv.states) ? argv.states.toLowerCase().split(' ') : _.keys(stateAbbrvToCode) 
 
 
+const dataDir = path.join(projectRoot, 'data/metros')
+
 const dataFiles = fs.readdirSync(dataDir)
-
-
-//setInterval(() => console.log(process._getActiveHandles(), 15000))
-//setInterval(() => console.log(process._getActiveRequests(), 10000))
-//process.on('uncaughtException', (err) => {
-  //console.log(`Caught exception: ${err}`)
-//})
 
 const dataFilesByTable = dataFiles.reduce((acc, fileName) => {
   let stateAbbrv = fileName.slice(0,2)
@@ -64,6 +60,11 @@ const dataFilesByTable = dataFiles.reduce((acc, fileName) => {
 }, {})
 
 
+const errorLogPath = path.join(process.cwd(), `dataUploadErrors.${new Date().toISOString()}.log`)
+let errorLog
+
+
+
 
 // postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
 const conString = (() => {
@@ -79,128 +80,89 @@ const conString = (() => {
 
 const uploadFile = (tableName, filePath, cb) => {
 
-  pg.on('error', (err) => console.log('\n\n', err.stack))
   pg.connect(conString, (err, client, done) => {
-      let gunzipper = zlib.createGunzip().on('error', done)
+
+      let calledBack = false
+
+      let errorHandler = (err) => {
+        let errorString = `\nError uploading ${filePath}.\n` + err.stack + '\n\n'
+        console.log(errorString)
+        errorLog = (errorLog || fs.createWriteStream(errorLogPath))
+        errorLog.write(errorString)
+        done()
+        if (!calledBack) return ((calledBack = true) && cb())
+      }
+
+      let gunzipper = zlib.createGunzip().on('error', errorHandler)
 
       //let copyToDBStream = client.query(copyFrom(`COPY ${tableName} FROM STDIN DELIMITER ',' CSV HEADER`))ww
-      let copyToDBStream = client.query(copyFrom(`COPY ${tableName} FROM STDIN DELIMITER ',' CSV HEADER`),
-                                        (err, res) => { 
-                                            console.log('===>', err || res)
-                                            return done() && cb(1)
-                                         }
-                           )
+      let copyToDBStream = client.query(copyFrom(`COPY ${tableName} FROM STDIN DELIMITER ',' CSV HEADER`))
 
-      let fileReadStream = fs.createReadStream(filePath).on('error', done)
+      copyToDBStream.on('error', errorHandler)
 
-      copyToDBStream.on('error', done)
 
       let timerLabel = filePath
       console.time(timerLabel)
 
-      let calledBack = false
-      fileReadStream.on('error', done)
-                    .pipe(gunzipper).on('error', done)
-                    .pipe(iconv.decodeStream('iso-8859-1').on('error', done).on('error', done))
-                    .pipe(iconv.encodeStream('utf8').on('error', done)).on('error', done)
-                    .pipe(copyToDBStream).on('error', done)
-                    .on('error', (err) => { 
-                        console.timeEnd(timerLabel)
-                        console.log(err.stack)
-                        if (client) done()
-                        if (!calledBack) return (calledBack = true) && cb(1)
-                    })
-                    .on('end', () => { 
-                        if (client) done()
-                        if (!calledBack) return (calledBack = true) && cb(null)
-                    })
-                    .on('finish', () => { 
-                        console.timeEnd(timerLabel)
-                        if (client) done()
-                        if (!calledBack) return (calledBack = true) && cb(null)
-                    })
+      fs.createReadStream(filePath).on('error', errorHandler).on('error', errorHandler)
+                                   .pipe(gunzipper).on('error', errorHandler)
+                                   .pipe(iconv.decodeStream('iso-8859-1').on('error', errorHandler))
+                                   .pipe(iconv.encodeStream('utf8').on('error', errorHandler))
+                                   .pipe(copyToDBStream)
+                                   .on('error', errorHandler)
+                                   .on('end', () => { 
+                                       if (client) done()
+                                       if (!calledBack) return (calledBack = true) && cb(null)
+                                   })
+                                   .on('finish', () => { 
+                                       console.timeEnd(timerLabel)
+                                       if (client) done()
+                                       if (!calledBack) return (calledBack = true) && cb(null)
+                                   })
   })
 }
 
-
-const loadDataForTable = (acc, tableName, cb1) => {
-  let query = `SELECT DISTINCT geography FROM ${tableName} WHERE char_length(geography) = 2;`
-
+const loadDataForTable = (tableName, cb) => {
 
   if (!dataFilesByTable[tableName]) {
     console.log("No data files for table", tableName)
-    return cb1(null, acc)
+    return cb(null)
   }
 
+  let query = `SELECT DISTINCT geography FROM ${tableName} WHERE char_length(geography) = 2;`
+
   dbService.runQuery(query, (err, result) => {
+
     if (err) { 
-      console.error(`Could not query ${tableName} for uploaded states.`)
-      console.error(err.stack)
-      return cb1(null) 
+      errorLog = (errorLog || fs.createWriteStream(errorLogPath))
+      errorLog.write(`Could not query ${tableName} for uploaded states.\nerr.stack`)
+      return cb(null) 
     }
 
-    let rows = result.rows
-
-    let uploadedStates = rows.reduce((acc2, row) => {
-      acc2[row.geography.trim()] = 1
+    let uploadedStatesTable = result.rows.reduce((acc, row) => {
+      acc[row.geography.trim()] = 1
         
-      return acc2
+      return acc
     }, {})
 
     // Get the .csv files that haven't yet been uploaded.
     let filesToUpload = dataFilesByTable[tableName].filter( (fileInfo) => 
-      !uploadedStates[fileInfo.stateCode] && _.includes(statesToUpload, fileInfo.stateAbbrv)
+      (!uploadedStatesTable[fileInfo.stateCode]) && _.includes(statesToUpload, fileInfo.stateAbbrv)
     )
 
-    if (Object.keys(uploadedStates).length) {
-      //console.log("The following files were already uploaded to the database:")
-      //console.log(JSON.stringify(_.difference(dataFilesByTable[tableName], filesToUpload), null, 4))
-    }
+    let uploadTasks = filesToUpload.map(fileInfo => uploadFile.bind(null, tableName, fileInfo.filePath))
 
     // We don't terminate on errors. We log them.
-    async.reduce(filesToUpload, acc, (acc, fileInfo, cb2) => {
-      uploadFile(tableName, fileInfo.filePath, (err) => {
-        if (err) {
-          // If there was a problem, we will delete the state from the table.
-          (acc[tableName] || (acc[tableName] = [])).push(fileInfo.stateCode)
-        }
-
-        cb2(null, acc)
-      })
-    }, cb1)
+    async.series(uploadTasks, cb)
   })
 }
 
+let loadTableTasks = tables.map(table => loadDataForTable.bind(null, table))
 
-async.reduce(tables, {}, loadDataForTable, (err, result) => {
-  if (err) { process.exit(1) }
+async.series(loadTableTasks, () => { 
+  if (errorLog) {
+    console.log(`Errors occurred while uploading the CSVs to Postgres. Check ${errorLogPath} for details.`)
+  }
 
-  let cleanerUpper = 
-    (deleteStatement, callback) => {
-      dbService.runQuery(
-        deleteStatement,
-        (err) => { 
-          if (err, result) { 
-            console.error(err)
-          } else {
-            console.log(err)
-          }
-          callback(null)
-        })
-    }
-
-  let cleanUpTasks = _.map(result, (stateCodes, tableName) => {
-    let states = "'" + `${stateCodes.join("','")}` + "'"
-
-    if (states.length) {
-      let deleteStatement = `DELETE FROM ${tableName} WHERE substring(geography from 0 for 3) IN (${states})`
-      console.log("The following statement is being run because an error occurred while uploading data:")
-      console.log(deleteStatement)
-      return cleanerUpper.bind(null, deleteStatement) 
-    } else return null
-  }).filter(t => t)
-
-  
-
-  async.series(cleanUpTasks, () => setTimeout(() => dbService.end, 3000))
+  dbService.end()
 })
