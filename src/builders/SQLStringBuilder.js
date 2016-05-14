@@ -127,6 +127,9 @@ console.log(requestedIndicators)
 
     let predicates = _.merge(categoriesWithConds, defaults)
 
+    predicates = _.pickBy(predicates, filterValArray => (filterValArray && filterValArray.length))
+
+
     toProject = _.uniq(toProject.concat(['geography', 'year', 'quarter']))
 
 

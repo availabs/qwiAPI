@@ -12,7 +12,6 @@ const app = require('express')()
 const bodyParser = require('body-parser')
 
 const async = require('async')
-const _ = require('lodash')
 
 
 
@@ -22,6 +21,7 @@ const buildSQLString = require('./src/builders/SQLStringBuilder').buildSQLString
 const runQuery = require('./src/services/DBService').runQuery
 const getUploadedStates = require('./src/services/DBService').getUploadedStates
 const getTableName = require('./src/services/TableService').getTableName
+const nestedResponseObjectBuilder = require('./src/builders/nestedResponseObjectBuilder')
 
 const port = (env.PORT || 10101)
 
@@ -55,8 +55,8 @@ app.get('/data/*', (req, res) => {
 
     let query = req.query
 
-console.log('\n----- FIELDS -----')
-console.log(query)
+//console.log('\n----- FIELDS -----')
+//console.log(query)
 
     let requestedIndicators = query.fields
 
@@ -77,9 +77,15 @@ console.log(query)
 
       runQuery(sqlString, (err, result) => {
           if (err) {
-              return res.status(500).send(err)
+            console.error(err.stack)
+            return res.status(500).send(err)
           } else {
-              return res.status(200).send({ data: result.rows })
+//console.log('===== RESULT =====')
+//console.log(JSON.stringify(result, null, 4))
+//console.log('===== RESULT DONE=====')
+            let hierarchicalResult = nestedResponseObjectBuilder.build(result.rows, requestedCategoryNames)
+            //return res.status(200).send({ data: result.rows })
+            return res.status(200).send({ data: hierarchicalResult })
           }
       })
     })

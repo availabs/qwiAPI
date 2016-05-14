@@ -20,6 +20,11 @@ const conString = (() => {
  //code based on example found here: https://github.com/brianc/node-postgres/wiki/Example 
 function runQuery (query, callback) {
 
+console.log('\n\n')
+console.log(query)
+console.log('\n\n')
+
+
     // get a pg client from the connection pool
     return pg.connect(conString, function(err, client, done) {
 
