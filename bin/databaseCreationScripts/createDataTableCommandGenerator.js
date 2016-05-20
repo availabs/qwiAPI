@@ -1,21 +1,23 @@
+const vLens = require('../../metadata/indentifiers').valueLengths
+
 module.exports = (dataTableName) => 
 
   `DROP TABLE IF EXISTS ${dataTableName};
    CREATE TABLE ${dataTableName} (
-       periodicity   char(1),  /* Periodicity of report */
-       seasonadj     char(1),  /* Seasonal Adjustment Indicator */
-       geo_level     char(1),  /* Group: Geographic level of aggregation */
-       geography     char(8),  /* Group: Geography code */
-       ind_level     char(1),  /* Group: Industry level of aggregation */
-       industry      char(5),  /* Group: Industry code */
-       ownercode     char(3),  /* Group: Ownership group code */
-       sex           char(1),  /* Group: Gender code */
-       agegrp        char(3),  /* Group: Age group code (WIA) */
-       race          char(2),  /* Group: race */
-       ethnicity     char(2),  /* Group: ethnicity */
-       education     char(2),  /* Group: education */
-       firmage       char(1),  /* Group: Firm Age group */
-       firmsize      char(1),  /* Group: Firm Size group */
+       periodicity   char(${vLens.periodicity}),  /* Periodicity of report */
+       seasonadj     char(${vLens.seasonadj}),  /* Seasonal Adjustment Indicator */
+       geo_level     char(${vLens.geo_level}),  /* Group: Geographic level of aggregation */
+       geography     char(${vLens.geography}),  /* Group: Geography code */
+       ind_level     char(${vLens.ind_level}),  /* Group: Industry level of aggregation */
+       industry      char(${vLens.industry}),  /* Group: Industry code */
+       ownercode     char(${vLens.ownercode}),  /* Group: Ownership group code */
+       sex           char(${vLens.sex}),  /* Group: Gender code */
+       agegrp        char(${vLens.agegrp}),  /* Group: Age group code (WIA) */
+       race          char(${vLens.race}),  /* Group: race */
+       ethnicity     char(${vLens.ethnicity}),  /* Group: ethnicity */
+       education     char(${vLens.education}),  /* Group: education */
+       firmage       char(${vLens.firmage}),  /* Group: Firm Age group */
+       firmsize      char(${vLens.firmsize}),  /* Group: Firm Size group */
        year          bigint,   /* Time: Year */
        quarter       bigint,   /* Time: Quarter */
        Emp           bigint,   /* Employment: Counts */

@@ -30,9 +30,9 @@ envFile(path.join(projectRoot, 'config/qwi.env'))
 
 const dbService = require(path.join(projectRoot, 'src/services/DBService'))
 
-const tables = require(path.join(projectRoot, 'src/metadata/tables'))
+const tables = require(path.join(projectRoot, 'metadata/tables'))
 
-const stateAbbrvToCode = require(path.join(projectRoot, 'src/metadata/geographic/stateAbbreviationToCode'))
+const stateAbbrvToCode = require(path.join(projectRoot, 'metadata/geographic/stateAbbreviationToCode'))
 
 
 const statesToUpload = (argv.states) ? argv.states.toLowerCase().split(' ') : _.keys(stateAbbrvToCode) 

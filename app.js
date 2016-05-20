@@ -15,13 +15,10 @@ const async = require('async')
 
 
 
-const validateRequestedCategories = require('./src/services/CategoryValidationService').validateRequestedCategories
-const validateRequestedIndicators = require('./src/services/MeasureValidationService').validateRequestedIndicators
+const parseRequest = require('./src/services/QueryParsingService').parse
 const buildSQLString = require('./src/builders/SQLStringBuilder').buildSQLString
-const runQuery = require('./src/services/DBService').runQuery
-const getUploadedStates = require('./src/services/DBService').getUploadedStates
-const getTableName = require('./src/services/TableService').getTableName
-const nestedResponseObjectBuilder = require('./src/builders/nestedResponseObjectBuilder')
+const handleParsedQueryObject = require('./src/services/DBService').handleParsedQueryObject
+const buildNestedResponseObject = require('./src/builders/nestedResponseObjectBuilder').build
 
 const port = (env.PORT || 10101)
 
@@ -30,64 +27,28 @@ app.use(bodyParser.json())
 
 
 
-app.get('/metadata/uploaded/states', (req, res) => {
-     getUploadedStates((err, result) => {
-        if (err) {
-            return res.status(500).send(err)
-        } else {
-            return res.status(200).send({ data: result })
-        }
-    })
-})
+const handleError = (res, err) => {
+  console.error(err.stack)
+  res.status(500).send({ error: err.message })
+}
 
 
 
 app.get('/data/*', (req, res) => {
 
-    let url = req.url.replace('/data/', '')
+    let chain = [
+      parseRequest.bind(null, req),
+      buildSQLString,
+      handleParsedQueryObject,
+      buildNestedResponseObject,
+    ]
 
-    let requestedCategories = url.toLowerCase()    // For case insensitive queries
-                                 .split('?')[0]    // The URL before the query params
-                                 .split('/')       // Split on the '/' character
-                                 .filter(s => s)   // Get rid of empty strings
-
-    let requestedCategoryNames = requestedCategories.map(s => s.replace(/[0-9]/g, '')) // Remove digits
-
-    let query = req.query
-
-//console.log('\n----- FIELDS -----')
-//console.log(query)
-
-    let requestedIndicators = query.fields
-
-    let validators = [ validateRequestedCategories.bind(null, requestedCategoryNames),
-                       validateRequestedIndicators.bind(null, requestedIndicators) ]
-
-
-    async.parallel(validators, (err) => {
-    
+    async.waterfall(chain, (err, data) => {
       if (err) {
-          console.error(err.stack)
-          return res.status(400).json({ error: err.message })
+        return handleError(res, err)
       }
 
-      let tableName = getTableName(requestedCategoryNames) 
-
-      let sqlString = buildSQLString(tableName, requestedCategories, requestedIndicators)
-
-      runQuery(sqlString, (err, result) => {
-          if (err) {
-            console.error(err.stack)
-            return res.status(500).send(err)
-          } else {
-//console.log('===== RESULT =====')
-//console.log(JSON.stringify(result, null, 4))
-//console.log('===== RESULT DONE=====')
-            let hierarchicalResult = nestedResponseObjectBuilder.build(result.rows, requestedCategoryNames)
-            //return res.status(200).send({ data: result.rows })
-            return res.status(200).send({ data: hierarchicalResult })
-          }
-      })
+      return res.status(200).send({ data: data })
     })
 })
 

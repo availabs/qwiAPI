@@ -3,164 +3,105 @@
 
 const _ = require('lodash')
 
-const aggregationCategoryDefaults = require('../metadata/aggregationCategories/categoryTotalVariables')
+const categoryVariableDefaults = require('../../metadata/indentifiers').variableDefaults
 
-const codeLengths = {
-    agegrp    : 2,
-    education : 1,
-    ethnicity : 1,
-    firmage   : 1,
-    firmsize  : 1,
-    geography : 7,
-    industry  : 2,
-    race      : 1,
-    sex       : 1,
-    year      : 4,
-    quarter   : 1,
-}
+const defaultCategoryPredicates = _.reduce(categoryVariableDefaults, (acc, defaultValue, categoryName) => {
+                                            acc[categoryName] = [defaultValue]
+                                            return acc
+                                           }, {})
 
-const codePrefixes = {
-    agegrp    : 'A',
-    education : 'E',
-    ethnicity : 'A',
-    race      : 'A',
-}
+const alwaysSelected = ['geography', 'year', 'quarter']
 
-// NOTE: There is no default geography.
-function getDefaults (tableName, categoriesWithConditions) {
-    
-    let defaults = {
-        ownercode   : ['A05'],
-        periodicity : ['Q'],
-        seasonadj   : ['U'],
-    }
-
-    let tableCategories = tableName.split('_')
-
-    let workerCategories = tableCategories[0]
-
-    // If we are using a sa* or se* table, and sex is not a projected category, 
-    // in the SQL query we must ask for the results aggregated over both sexes. 
-    if ((workerCategories === 'sa' || workerCategories === 'se') && !categoriesWithConditions.sex) {
-        defaults.sex = [aggregationCategoryDefaults.sex]
-    }
-
-    // If we are using the sa* table but agegrp is not projected, we must aggregate over agegrp.
-    if ((workerCategories === 'sa') && !categoriesWithConditions.agegrp) {
-        defaults.agegrp = [aggregationCategoryDefaults.agegrp]
-    }
-
-    // If we are using the se* table but education is not projected, we must aggregate over education.
-    if ((workerCategories === 'se') && !categoriesWithConditions.education) {
-        defaults.education = [aggregationCategoryDefaults.education]
-    }
-
-
-    // If we are using the rh* table but ethnicity is not projected, we must aggregate over ethnicity.
-    if ((workerCategories === 'rh') && !categoriesWithConditions.ethnicity) {
-        defaults.ethnicity = [aggregationCategoryDefaults.ethnicity]
-    }
-
-    // If we are using the rh* table but race is not projected, we must aggregate over race.
-    if ((workerCategories === 'rh') && !categoriesWithConditions.race) {
-        defaults.race = [aggregationCategoryDefaults.race]
-    }
-
-
-    // If we are using the rh* table but race is not projected, we must aggregate over race.
-    if ((workerCategories === 'fa') && !categoriesWithConditions.firmage) {
-        defaults.firmage = [aggregationCategoryDefaults.firmage]
-    }
-
-    // If we are using the rh* table but race is not projected, we must aggregate over race.
-    if ((workerCategories === 'fs') && !categoriesWithConditions.firmsize) {
-        defaults.firmsize = [aggregationCategoryDefaults.firmsize]
-    }
-
-
-    // If industry not projected, aggregate over it.
-    if (!categoriesWithConditions.industry) {
-        defaults.industry = [aggregationCategoryDefaults.industry]
-    }
-
-    return defaults
-}
 
 /**
- * The reqCatWithConds parameter is an array strings representing category names followed by the numeric filters.
+ *  The parsedQueryObject parameter should be the output from QueryParsingService.parse.
+ *
+ *  If the value for a categoryPredicates entry is null, that means that all 
+ *    values except for the aggregate column value will be returned.
+ *
+ *  If the value for a categoryPredicates value is undefined, it is replaced with the category defaults.
+ *    
+ * WARNING: This function expects the categoryQueryPredicates and requestedIndicators to be validated beforehand. 
+ *          !!! Without prior validation, this code is completely vulnerable to SQL-injection !!!
  */
-function buildSQLString (tableName, reqCategoriesWithConds, requestedIndicators) {
+function buildSQLString (parsedQueryObject, cb) {
 
-console.log(tableName)
-console.log(reqCategoriesWithConds)
-console.log(requestedIndicators)
+    try {
 
-    
-    // Builds a map of "category" -> [filter values]
-    let categoriesWithConds = reqCategoriesWithConds.reduce((acc, cat) => {
-        let m = cat.match(/\d+/)
-            
-        let catName = (m) ? cat.substring(0, m.index) : cat
+      let toSelect = _.uniq(_.concat(parsedQueryObject.caregoryNames, 
+                                     parsedQueryObject.indicators, 
+                                     alwaysSelected).filter(k => k))
 
-        if (m && (m[0].length % codeLengths[catName])) {
-            throw new Error('The filter values for ' + catName + ' are not the expected length.')
+      // If a category is no specified
+      let wherePredicates = _.defaults(parsedQueryObject.categoryPredicates, defaultCategoryPredicates)
+
+
+      // If no geography codes are provided, we default to returning the data for all the states.
+      if (!wherePredicates.geography) {
+        // We do not allow the all metros request. Client must specifically request metro areas.
+        if (_.includes(wherePredicates.geo_level, 'm')) {
+          return cb(new Error('For metro-level queries, you must specify the metro codes to return.'))
         }
 
-        let numChunker = new RegExp('.{1,'+ codeLengths[catName] + '}', 'g')
-        let filterVals = (m) ? (m[0].match(numChunker)) : []
+        wherePredicates.geo_level = ['S']
+      }
 
-        // We omit the letter prefixes in the url. Now we put them back.
-        if (codePrefixes[catName]) {
-            filterVals = filterVals.map(v => (codePrefixes[catName] + v))
-        }
+     parsedQueryObject.sqlStatement = 
+        'SELECT ' + toSelect.join(', ') + '\n' +
+        'FROM '   + parsedQueryObject.tableName + '\n' + 
+        'WHERE ' + 
+            _.map(wherePredicates, (reqCategoryValues, categoryName) => {
 
-        acc[catName] = filterVals
+              // The client specified requested values for the category.
+              if (reqCategoryValues && reqCategoryValues.length) {
+                // For geographies, we do a prefix match
+                // This allows us to get all the metro-level data for a state, for example.
+                if (categoryName === 'geography') {
+                    // For prefix matching, we remove the zero padding if it exists.
+                    // Because some state fips codes start with zero, we must take care 
+                    // not to remove the leading zeroes of the padded fips code... thus the `{2,5}`.
+                    let codes = reqCategoryValues.map(code => code.replace(/^0{2,6}/, ''))
+                    return '(' +  codes.map(code => `(geography = '${code}')`).join(' OR ') + ')'
+                }
 
-        return acc
-    }, {})
-    
-    let categoryNames = Object.keys(categoriesWithConds)
+                // Years and quarters are numeric data types in the table.
+                if (categoryName === 'quarter') {
+                    let quarters = reqCategoryValues.map(i => parseInt(i))
 
-    let toProject = _.concat(categoryNames, requestedIndicators).filter(k => k)
+                    return '(' + quarters.map(qtr => `(quarter = ${qtr})`).join(' OR ') + ')'
+                }
 
-    let defaults = getDefaults(tableName, categoriesWithConds)
+                // Years and quarters are numeric data types in the table.
+                if (categoryName === 'year') {
 
-    let predicates = _.merge(categoriesWithConds, defaults)
+                    let years = reqCategoryValues.map(year => parseInt(year)).sort()
 
-    predicates = _.pickBy(predicates, filterValArray => (filterValArray && filterValArray.length))
-
-
-    toProject = _.uniq(toProject.concat(['geography', 'year', 'quarter']))
-
-
-
-    return  'SELECT ' + toProject.join(', ') + '\n' +
-            'FROM '   + tableName + '\n' + 
-            'WHERE ' + 
-                _.map(predicates, (filterValArray, category) => {
-
-                    // For geographies, we do a prefix match
-                    // This allows us to get all the metro-level data for a state, for example.
-                    if ((category === 'geography') && (filterValArray.length)) {
-                        // For prefix matching, we remove the zero padding if it exists.
-                        // Because some state fips codes start with zero, we remove
-                        // the leading zeros iff there is more than leading zero.
-                        // If we remove leading zeros, we must take care not to remove the leading 
-                        // zero of the padded fips code.
-                        let codes = filterValArray.map(code => code.replace(/^0{2,5}/, ''))
-                        return '(' +  codes.map(code => `(${category} LIKE '${code}%')`).join(' OR ') + ')'
+                    if (years.length === 2) {
+                      return `(year BETWEEN ${years[0]} AND ${years[1]})`
                     }
 
-                    // Years and quarters are numeric data types in the table.
-                    if ((category === 'year') || (category === 'quarter')) {
-                        return '(' + filterValArray.map(val => `(${category} = ${val})`).join(' OR ') + ')'
-                    }
+                    return '(' + years.map(val => `(year = ${val})`).join(' OR ') + ')'
+                }
 
-                    return '(' + ((filterValArray.length) ?
-                                    (filterValArray.map(val => `(${category} = '${val}')`).join(' OR ')) :
-                                     `${category} <> '${aggregationCategoryDefaults[category]}'`) + ')'
-                }).join(' AND \n') + 
-            ';'
+                // Not a special case
+                return '(' + reqCategoryValues.map(val => `(${categoryName} = '${val.toUpperCase()}')`).join(' OR ') + ')'
+
+              } else {
+                // No requested values for the category that were requested.
+                // In this case, if the category has a default value that represents
+                // the sum across all members of the category, we exclude that value from the result.
+                return (_.includes(alwaysSelected, categoryName)) ? '' :
+                  '(' + `${categoryName} <> '${categoryVariableDefaults[categoryName]}'` + ')'
+              }
+
+
+            }).filter(s=>s).join(' AND \n') + 
+        ';'
+
+      return cb(null, parsedQueryObject)
+    } catch (err) {
+      return cb(err)
+    }
 }
 
 

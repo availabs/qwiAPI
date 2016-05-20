@@ -18,6 +18,7 @@
 */
 
 // NOTE: Assumes the requested categories were already validated.
+// TODO: Find out which tables are smallest and use those as the defaults.
 const getTableName = (categories) => {
 
   let reqCatObj = categories.reduce((acc, cat) => { acc[cat] = 1; return acc }, {}) 

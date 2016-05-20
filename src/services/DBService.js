@@ -16,11 +16,23 @@ const conString = (() => {
 })()
 
 
+const handleParsedQueryObject = (parsedQueryObject, cb) => {
+  runQuery(parsedQueryObject.sqlStatement, (err, result) => {
+    if (err) {
+      return cb(err)
+    }
+
+    parsedQueryObject.result = result
+
+    return cb(null, parsedQueryObject)
+  }) 
+}
+
 
  //code based on example found here: https://github.com/brianc/node-postgres/wiki/Example 
 function runQuery (query, callback) {
 
-  console.log(query)
+  console.log(`\n${query}\n`)
 
   // get a pg client from the connection pool
   return pg.connect(conString, function(err, client, done) {
@@ -60,6 +72,7 @@ const end = () => {
 
 
 module.exports = {
-    runQuery : runQuery,
-    end      : end,
+  handleParsedQueryObject : handleParsedQueryObject,
+  runQuery                : runQuery,
+  end                     : end,
 }

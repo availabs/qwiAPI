@@ -1,33 +1,42 @@
 'use strict'
 
 
-const build = (result, nestingCategories) => {
+const build = (parsedQueryObject, cb) => {
   
-  let nestedResult = {}
-  let cur
-  let column
+  try {
+    let rows = parsedQueryObject.result.rows
 
-  for (let i = 0; i < result.length; ++i) {
-    
-    let row = result[i]
-
-    row.geography = row.geography.trim()
-
-    cur = nestedResult
-    for (let i = 0; i < (nestingCategories.length - 1); ++i) {
-      column = nestingCategories[i] 
-      
-      cur = (cur[row[column]] || (cur[row[column]] = {}))
+    if (parsedQueryObject.flatResult) {
+      return cb(null, rows)
     }
 
-    column = nestingCategories[nestingCategories.length - 1]
+    let nestingCategories = parsedQueryObject.categoryNames
+    let nestedResult = {}
+    let cur
+    let column
 
-console.log('========>>>', row[column])
+    for (let i = 0; i < rows.length; ++i) {
+      
+      let row = rows[i]
 
-    cur[row[column]] = row
+      row.geography = row.geography.trim()
+
+      cur = nestedResult
+      for (let i = 0; i < (nestingCategories.length - 1); ++i) {
+        column = nestingCategories[i] 
+        
+        cur = (cur[row[column]] || (cur[row[column]] = {}))
+      }
+
+      column = nestingCategories[nestingCategories.length - 1]
+
+      cur[row[column]] = row
+    }
+
+    return cb(null, nestedResult)
+  } catch (err) {
+    return cb(err)
   }
-
-  return nestedResult
 }
 
 

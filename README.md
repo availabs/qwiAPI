@@ -15,7 +15,7 @@ Needs try/catch blocks throughout codebase. Currently very brittle.
 Index building route on the way.
 
 Example Queries:
-http://localhost:10101/data/?fields=emp
+http://localhost:10101/data/?indicators=emp
 
 
 
@@ -37,12 +37,17 @@ Notes on the API
     Table columns can be divided into two groups: queryable aggregation columns and indicator/status_flag values.
 
       * Queryable columns:
-          When using this API, the queryable columns can be specified in the dynamic path, or
+          When using this API, the queryable columns are be specified in the dynamic path, or
             as a field in the query portion of the request.
           The key difference is that, unless `flat=true` is included in query of the request,
             columns including in the path are used to generate the hierarchical nesting of the result.
-            If a column is included in the query portion as `fields=<column name>`, the value will appear 
+            If a column is included in the query portion as `indicators=<column name>`, the value will appear 
             in the leaf data object, but will not be used in creating the nested result object.
+
+            You can use this distinction to gain finer control over the response object structure,
+              however keep in mind that category filter values can only be included as part
+              of a dynamic route, not an indicator query parameter.
+                eg: `/year2010?indicators=emp` is valid, whereas `/?indicators=emp&indicators=year2010` is not.
 
             The queryable columns are comprised of
               * The demographic aggregation categories:
@@ -75,17 +80,17 @@ Notes on the API
 
       * Indicator values can only occur in the query portion. 
           If they occur in the URL path, this will result in an error response.
-          If no indicator value is specified as a member of `fields`, an error is thrown.
+          If no indicator value is specified as a member of `indicators`, an error is thrown.
             We do not include all the indicators and status_flags by the default 
               because there are 66 of them in total.
           The `/metadata/labels/indicators` and `/metadata/labels/status_flags` routes provide 
             a list of the possible indicators and status_flags, along with a description of each.
 
-  Fields:
-    Request fields in the query portion of the URL with (possibly repeated) fields=<field name> parameters.
+  Indicators:
+    Request indicators in the query portion of the URL with (possibly repeated) indicators=<field name> parameters.
       For example,
 
-        `/geography0000036?fields=emp&fields=hira`
+        `/geography0000036?indicators=emp&indicators=hira`
         
       will return the emp  (Beginning-of-Quarter Employment: Counts) 
         and the hira (Hires All: Counts) indicators for 

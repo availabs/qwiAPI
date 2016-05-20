@@ -3,12 +3,10 @@
 
 const _ = require('lodash')
 
-const indicatorLabels = require('../metadata/labels/indicators')
-
+const indicatorLabels = require('../../metadata/labels/indicators')
 
 
 const supportedIndicators = Object.keys(indicatorLabels).map(l => l.toLowerCase())
-
 
 
 const validateRequestedIndicators = (requestedIndicators, callback) => {

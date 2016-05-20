@@ -19,7 +19,7 @@ const env = require('process').env
 const dataDir = path.join(projectRoot, 'data/metros')
 mkdirp.sync(dataDir)
 
-const states = Object.keys(require(path.join(projectRoot, 'src/metadata/geographic/stateAbbreviationToCode')))
+const states = Object.keys(require(path.join(projectRoot, 'metadata/geographic/stateAbbreviationToCode')))
 
 
 const demoCategories = ['sa', 'se', 'rh']

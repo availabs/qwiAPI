@@ -18,16 +18,11 @@ Only certain combinations of demographic and firm categories are valid. This is 
 const _ = require('lodash')
 
 
-const demographicCategories = require('../metadata/aggregationCategories/demographic')
-const firmCategories = require('../metadata/aggregationCategories/firm')
+const demographicCategories = require('../../metadata/indentifiers').demographicCategories
+const firmCategories = require('../../metadata/indentifiers').firmCategories
 
-const queryableCategories = require('../metadata/queryableCategories')
+const validDemographicCategoryCombinations = require('../../metadata/tables').validDemographicCategoryCombinations 
 
-const validWorkerCategoryCombinations = [
-  ['agegrp',    'sex'],
-  ['education', 'sex'],
-  ['ethnicity', 'race'],
-]
 
 // Code taken from http://codereview.stackexchange.com/a/75663
 const pairwise = (list) => {
@@ -39,24 +34,11 @@ const pairwise = (list) => {
 }
 
 
-
-const verifyCategoriesSupported = (categories) => {
-    let unsupportedCategories = _.difference(categories, queryableCategories)
-
-    if (unsupportedCategories.length) {
-        'The following requested categor' + 
-            ((unsupportedCategories.length > 1) ? 'ies are ' : 'y is ') +  
-            'not recognized: [' + unsupportedCategories.join(', ') + '].\n'
-    } 
-}
-
-
 // The following function makes sure the requested category combination is supported by the dataset.
 const validateWorkerCharacteristicCombinations = (reqCategories) => {
-
     let reqWorkerCategories = _.intersection(reqCategories, demographicCategories).sort()
      
-    let invalidCombos = _.differenceWith(pairwise(reqWorkerCategories), validWorkerCategoryCombinations, _.equals) 
+    let invalidCombos = _.differenceWith(pairwise(reqWorkerCategories), validDemographicCategoryCombinations, _.equals)
 
     if (invalidCombos.length) {
       return 'The following combination pairs are not supported: [' + invalidCombos.join(', ') + ']'
@@ -73,15 +55,13 @@ const validateFirmCharacteristicCombinations = (categories) => {
 }
 
 
-
 const allValidators = [
-  verifyCategoriesSupported,
   validateWorkerCharacteristicCombinations,
   validateFirmCharacteristicCombinations,
 ]
 
 
-const validateRequestedCategories = (categories, callback) => {
+const validateCategoryCombinations = (categories, callback) => {
   let errorMessage = allValidators.map(validator => validator(categories)).filter(e => e).join('\n')
 
   callback(errorMessage ? new Error(errorMessage) : null)
@@ -89,5 +69,5 @@ const validateRequestedCategories = (categories, callback) => {
 
 
 module.exports = {
-  validateRequestedCategories,
+  validateCategoryCombinations,
 }
