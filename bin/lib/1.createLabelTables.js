@@ -19,10 +19,15 @@ const dbService = require(path.join(projectRoot, 'src/services/DBService'))
 
 // The labelsObj is nested. We need to flatten it.
 const f = (a,o,k) => ((_.isObject(_.sample(_.values(o)))) ? _.reduce(o, f, a) : (a[k] = o)) && a
+
 const labelsObj = _.reduce(require(path.join(projectRoot, 'metadata/labels')), f, {})
 
-const insertStatementBuilder = (table, label, field) => 
-  "INSERT INTO label_" +table+ " VALUES ('" + field.toString().replace(/'/, '') + "','" + label.replace(/'/, '') + "');"
+const insertStatementBuilder = (table, label, field) => {
+  label = label.replace(/'/, '')
+  field = field.toString().replace(/'/, '')
+
+  return `INSERT INTO label_${table} VALUES ('${field}','${label}');`
+}
  
 
 const sqlCommands = _.map(_.omit(labelsObj, '_source'), (v, k) => 
@@ -32,11 +37,13 @@ const sqlCommands = _.map(_.omit(labelsObj, '_source'), (v, k) =>
 ).join('')
 
 
-dbService.runQuery(sqlCommands, (err, result) => { 
+dbService.runQuery(sqlCommands, (err) => { 
   if (err) {
     return console.error(err) 
   }
+
+  dbService.end()
   
-  console.log(result)
+  console.log("Label tables created.")
 })
 

@@ -1,1 +1,1 @@
-For changes to the POSTGRES_USER and POSTGRES_PASSWORD to take place, make sure the previous containers have been removed from docker. Also, I had to rm the pg_data directory. There probably is a less drastic means to that end.
+For changes to the QWI_POSTGRES_USER and QWI_POSTGRES_PASSWORD to take place, make sure the previous containers have been removed from docker. Also, I had to rm the pg_data directory. There probably is a less drastic means to that end.

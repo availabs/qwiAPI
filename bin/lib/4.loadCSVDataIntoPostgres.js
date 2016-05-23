@@ -26,19 +26,25 @@ const projectRoot = path.join(__dirname, '../../')
 const envFile = require('node-env-file')
 envFile(path.join(projectRoot, 'config/postgres_db.env'))
 envFile(path.join(projectRoot, 'config/qwi.env'))
+const env = process.env
 
+
+const qwi_release = env.QWI_RELEASE
+if (!qwi_release) {
+  console.error("The QWI_RELEASE environment variable must be set in config/qwi.env")
+}
+
+const dataDir = path.join(projectRoot, `data/metros_${qwi_release}`)
 
 const dbService = require(path.join(projectRoot, 'src/services/DBService'))
 
-const tables = require(path.join(projectRoot, 'metadata/tables'))
+const tables = require(path.join(projectRoot, 'metadata/tables')).names
 
 const stateAbbrvToCode = require(path.join(projectRoot, 'metadata/geographic/stateAbbreviationToCode'))
 
 
 const statesToUpload = (argv.states) ? argv.states.toLowerCase().split(' ') : _.keys(stateAbbrvToCode) 
 
-
-const dataDir = path.join(projectRoot, 'data/metros')
 
 const dataFiles = fs.readdirSync(dataDir)
 
@@ -68,17 +74,19 @@ let errorLog
 
 // postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
 const conString = (() => {
-    let user   = process.env.POSTGRES_USER
-    let passwd = process.env.POSTGRES_PASSWORD || ''
-    let netloc = process.env.POSTGRES_NETLOC
-    let port   = process.env.POSTGRES_PORT     || ''
-    let dbname = process.env.POSTGRES_DB
+    let user   = env.QWI_POSTGRES_USER
+    let passwd = env.QWI_POSTGRES_PASSWORD || ''
+    let netloc = env.QWI_POSTGRES_NETLOC
+    let port   = env.QWI_POSTGRES_PORT     || ''
+    let dbname = env.QWI_POSTGRES_DB
 
     return 'postgresql://' + user + (passwd && (':' + passwd)) +'@'+ netloc + (port && (':' + port)) +'/'+ dbname
 })()
 
 
 const uploadFile = (tableName, filePath, cb) => {
+
+  let delayedCb = () => setTimeout(cb, 1500)
 
   pg.connect(conString, (err, client, done) => {
 
@@ -89,8 +97,8 @@ const uploadFile = (tableName, filePath, cb) => {
         console.log(errorString)
         errorLog = (errorLog || fs.createWriteStream(errorLogPath))
         errorLog.write(errorString)
-        done()
-        if (!calledBack) return ((calledBack = true) && cb())
+        done(client)
+        if (!calledBack) return ((calledBack = true) && delayedCb())
       }
 
       let gunzipper = zlib.createGunzip().on('error', errorHandler)
@@ -111,13 +119,13 @@ const uploadFile = (tableName, filePath, cb) => {
                                    .pipe(copyToDBStream)
                                    .on('error', errorHandler)
                                    .on('end', () => { 
-                                       if (client) done()
-                                       if (!calledBack) return (calledBack = true) && cb(null)
+                                       done()
+                                       if (!calledBack) return (calledBack = true) && delayedCb(null)
                                    })
                                    .on('finish', () => { 
                                        console.timeEnd(timerLabel)
-                                       if (client) done()
-                                       if (!calledBack) return (calledBack = true) && cb(null)
+                                       done()
+                                       if (!calledBack) return (calledBack = true) && delayedCb(null)
                                    })
   })
 }
@@ -131,7 +139,7 @@ const loadDataForTable = (tableName, cb) => {
 
   let query = `SELECT DISTINCT geography FROM ${tableName} WHERE char_length(geography) = 2;`
 
-  dbService.runQuery(query, (err, result) => {
+  setTimeout(() => dbService.runQuery(query, (err, result) => {
 
     if (err) { 
       errorLog = (errorLog || fs.createWriteStream(errorLogPath))
@@ -154,14 +162,17 @@ const loadDataForTable = (tableName, cb) => {
 
     // We don't terminate on errors. We log them.
     async.series(uploadTasks, cb)
-  })
+  }), 1500)
 }
 
 let loadTableTasks = tables.map(table => loadDataForTable.bind(null, table))
 
 async.series(loadTableTasks, () => { 
   if (errorLog) {
-    console.log(`Errors occurred while uploading the CSVs to Postgres. Check ${errorLogPath} for details.`)
+    console.log(`
+        Errors occurred while uploading the CSVs to Postgres. 
+        Check ${errorLogPath} for details.
+    `)
   }
 
   dbService.end()

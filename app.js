@@ -13,7 +13,7 @@ const bodyParser = require('body-parser')
 
 const async = require('async')
 
-
+const labels = require('./metadata/labels')
 
 const parseRequest = require('./src/services/QueryParsingService').parse
 const buildSQLString = require('./src/builders/SQLStringBuilder').buildSQLString
@@ -21,6 +21,8 @@ const handleParsedQueryObject = require('./src/services/DBService').handleParsed
 const buildNestedResponseObject = require('./src/builders/nestedResponseObjectBuilder').build
 
 const port = (env.PORT || 10101)
+
+
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
@@ -33,6 +35,9 @@ const handleError = (res, err) => {
 }
 
 
+app.get('/metadata/labels', (req, res) => {
+  return res.status(200).send(labels)
+})
 
 app.get('/data/*', (req, res) => {
 

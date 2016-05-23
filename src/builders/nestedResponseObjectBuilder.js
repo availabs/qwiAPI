@@ -14,23 +14,24 @@ const build = (parsedQueryObject, cb) => {
     let nestedResult = {}
     let cur
     let column
+    let i, j
 
-    for (let i = 0; i < rows.length; ++i) {
+    for (i = 0; i < rows.length; ++i) {
       
       let row = rows[i]
 
       row.geography = row.geography.trim()
 
       cur = nestedResult
-      for (let i = 0; i < (nestingCategories.length - 1); ++i) {
-        column = nestingCategories[i] 
-        
+      for (j = 0; j < (nestingCategories.length - 1); ++j) {
+        column = nestingCategories[j] 
         cur = (cur[row[column]] || (cur[row[column]] = {}))
       }
 
-      column = nestingCategories[nestingCategories.length - 1]
+      // The last column in the nesting.
+      column = nestingCategories[j];
 
-      cur[row[column]] = row
+      (cur[row[column]] || (cur[row[column]] = [])).push(row)
     }
 
     return cb(null, nestedResult)

@@ -6,11 +6,11 @@ const pg = require('pg')
 
  //postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
 const conString = (() => {
-    let user   = process.env.POSTGRES_USER
-    let passwd = process.env.POSTGRES_PASSWORD || ''
-    let netloc = process.env.POSTGRES_NETLOC
-    let port   = process.env.POSTGRES_PORT     || ''
-    let dbname = process.env.POSTGRES_DB
+    let user   = process.env.QWI_POSTGRES_USER
+    let passwd = process.env.QWI_POSTGRES_PASSWORD || ''
+    let netloc = process.env.QWI_POSTGRES_NETLOC
+    let port   = process.env.QWI_POSTGRES_PORT     || ''
+    let dbname = process.env.QWI_POSTGRES_DB
 
     return 'postgresql://' + user + (passwd && (':' + passwd)) +'@'+ netloc + (port && (':' + port)) +'/'+ dbname
 })()
@@ -31,8 +31,6 @@ const handleParsedQueryObject = (parsedQueryObject, cb) => {
 
  //code based on example found here: https://github.com/brianc/node-postgres/wiki/Example 
 function runQuery (query, callback) {
-
-  console.log(`\n${query}\n`)
 
   // get a pg client from the connection pool
   return pg.connect(conString, function(err, client, done) {

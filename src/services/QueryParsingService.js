@@ -12,22 +12,21 @@ const categoricalVariableLabels = require('../../metadata/labels/categorical_var
 
 
 const CategoryValidationService = require('./CategoryValidationService.js')
-const IndicatorValidationService = require('./IndicatorValidationService.js')
+const RequestedFieldsValidationService = require('./RequestedFieldsValidationService.js')
 const TableService = require('./TableService')
 
 
 
 const getCategoryName = (requestedCategoryPredicate) => {
-console.log(requestedCategoryPredicate)
-      let categoryMatch = requestedCategoryPredicate.match(categoryNamesRegExp)
+  let categoryMatch = requestedCategoryPredicate.match(categoryNamesRegExp)
 
-      // If the category is not recognized, throw an error.
-      // This prevents running futile queries, gives meaningful errors to client, and guards agains SQL-injection.
-      if (!categoryMatch) {
-        throw new Error(`Invalid category query: unrecognized category in ${requestedCategoryPredicate}`)
-      }
+  // If the category is not recognized, throw an error.
+  // This prevents running futile queries, gives meaningful errors to client, and guards agains SQL-injection.
+  if (!categoryMatch) {
+    throw new Error(`Invalid category query: unrecognized category in ${requestedCategoryPredicate}`)
+  }
 
-      return categoryMatch[0]
+  return categoryMatch[0]
 }
 
 const newDuplicateCategoryChecker = () => {
@@ -41,6 +40,7 @@ const newDuplicateCategoryChecker = () => {
     seenCategories[categoryName] = 1
   }
 }
+
 
 const getRequestedValues = (categoryName, reqCategoryPredicate) => {
   let requestedValuesString = (reqCategoryPredicate.slice(categoryName.length) || null)
@@ -61,12 +61,15 @@ const getRequestedValues = (categoryName, reqCategoryPredicate) => {
 
   if (labelsTable) {
     _.every(requestedValues, val => {
-      if (!labelsTable[val]) {
+      if (!labelsTable[val.toUpperCase()]) {
+        console.log(labelsTable)
         throw new Error(`ERROR: ${val} is not in the domain of ${categoryName}.`)
       }
     })
   } else {
     // If there are no labels, the category's values are numeric codes.
+    // This is the case for geography, year, quarter.
+    // We validate by parsing the integer values. Note: For industry, we remove the '-' character.
     _.every(requestedValues, val => {
       if (isNaN(parseInt(val.replace(/-/, '')))) {
         throw new Error(`ERROR: ${val} is not in the domain of ${categoryName}.`)
@@ -77,6 +80,21 @@ const getRequestedValues = (categoryName, reqCategoryPredicate) => {
   return requestedValues
 }
 
+
+const getFields = (query) => {
+  let fields = (query && query.fields) || null
+  
+  if (Array.isArray(fields)) {
+    fields = fields.filter(f => f)
+    if (!fields.length) {
+      fields = null
+    }
+  } else if (fields) {
+    fields = [fields]
+  }
+
+  return fields
+}
 
 
 const parse = (request, cb) => {
@@ -109,12 +127,11 @@ const parse = (request, cb) => {
       return acc
     }, {})
     
-
-    let indicators = (query && query.indicators) || null
+    let fields = getFields(query)
 
     let validators = [
       CategoryValidationService.validateCategoryCombinations.bind(null, categoryNames),
-      IndicatorValidationService.validateRequestedIndicators.bind(null, indicators)
+      RequestedFieldsValidationService.validateRequestedFields.bind(null, fields)
     ]
 
     async.parallel(validators, (err) => {
@@ -124,12 +141,14 @@ const parse = (request, cb) => {
 
       let tableName = TableService.getTableName(categoryNames)
 
+      let flatResult = !!(query && query.flat && (query.flat.toLowerCase() === 'true'))
+
       return cb(null, {
         tableName          : tableName,
         categoryNames      : categoryNames,
         categoryPredicates : categoryPredicates,
-        indicators         : indicators,
-        flatResult         : !!(query && query.flat),
+        fields             : fields,
+        flatResult         : flatResult,
       })
     })
 

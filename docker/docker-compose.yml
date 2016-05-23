@@ -12,10 +12,16 @@ services:
       env_file: 
           - "../config/node_server.env"
           - "../config/postgres_db.env"
+          - "../config/qwi.env"
         
     postgres:
-      image: postgres:9.5
+      image: postgres:9.3
+      ports:
+        - "5433:5432"
       volumes:
         - ./pg_data:/data
         - ../data/bin/:/init_scripts
       env_file: "../config/postgres_db.env"
+      environment:
+        - PGDATA=/data
+        - POSTGRES_PASSWORD=QWI_API

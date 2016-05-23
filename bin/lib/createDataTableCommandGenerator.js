@@ -1,4 +1,4 @@
-const vLens = require('../../metadata/indentifiers').valueLengths
+const vLens = require('../../metadata/indentifiers').variableLengths
 
 module.exports = (dataTableName) => 
 
@@ -84,5 +84,6 @@ module.exports = (dataTableName) =>
        sEarnHirNS    bigint,   /* Status: Hires New stable jobs: Average monthly earnings */
        sEarnSepS     bigint,   /* Status: Separations stable jobs: Average monthly earnings */
        sPayroll      bigint    /* Status: Total quarterly payroll: Sum */
-  );`
+  );
+`
 

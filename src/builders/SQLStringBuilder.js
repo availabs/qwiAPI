@@ -21,15 +21,15 @@ const alwaysSelected = ['geography', 'year', 'quarter']
  *
  *  If the value for a categoryPredicates value is undefined, it is replaced with the category defaults.
  *    
- * WARNING: This function expects the categoryQueryPredicates and requestedIndicators to be validated beforehand. 
+ * WARNING: This function expects the categoryQueryPredicates and requestedFields to be validated beforehand. 
  *          !!! Without prior validation, this code is completely vulnerable to SQL-injection !!!
  */
 function buildSQLString (parsedQueryObject, cb) {
 
     try {
 
-      let toSelect = _.uniq(_.concat(parsedQueryObject.caregoryNames, 
-                                     parsedQueryObject.indicators, 
+      let toSelect = _.uniq(_.concat(parsedQueryObject.categoryNames, 
+                                     parsedQueryObject.fields, 
                                      alwaysSelected).filter(k => k))
 
       // If a category is no specified

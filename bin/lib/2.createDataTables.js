@@ -28,12 +28,14 @@ let tablenames =
 let sqlCommand = tablenames.map(tableName => createDataTableCommandGenerator(tableName)).join('')
 
 
-dbService.runQuery(sqlCommand, (err, result) => { 
+dbService.runQuery(sqlCommand, err => { 
   if (err) {
     return console.error(err) 
   }
   
-  console.log(result)
+  console.log("Created the data tables.")
+
+  dbService.end()
 })
 
 
