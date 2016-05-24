@@ -1,0 +1,24 @@
+
+Error uploading /home/paul/AVAIL/kauffman/QWI/qwiAPI/data/metros_R2016Q1/nd_sa_fs_gm_ns_op_u.csv.gz.
+Error: Connection terminated
+    at null.<anonymous> (/home/paul/AVAIL/kauffman/QWI/qwiAPI/node_modules/pg/lib/client.js:189:29)
+    at g (events.js:273:16)
+    at emitNone (events.js:80:13)
+    at emit (events.js:179:7)
+    at Socket.<anonymous> (/home/paul/AVAIL/kauffman/QWI/qwiAPI/node_modules/pg/lib/connection.js:66:10)
+    at emitOne (events.js:95:20)
+    at Socket.emit (events.js:182:7)
+    at TCP._onclose (net.js:475:12)
+
+
+Error uploading /home/paul/AVAIL/kauffman/QWI/qwiAPI/data/metros_R2016Q1/nd_sa_fs_gm_ns_op_u.csv.gz.
+Error: Connection terminated
+    at null.<anonymous> (/home/paul/AVAIL/kauffman/QWI/qwiAPI/node_modules/pg/lib/client.js:189:29)
+    at g (events.js:273:16)
+    at emitNone (events.js:80:13)
+    at emit (events.js:179:7)
+    at Socket.<anonymous> (/home/paul/AVAIL/kauffman/QWI/qwiAPI/node_modules/pg/lib/connection.js:66:10)
+    at emitOne (events.js:95:20)
+    at Socket.emit (events.js:182:7)
+    at TCP._onclose (net.js:475:12)
+

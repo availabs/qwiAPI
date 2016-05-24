@@ -71,7 +71,6 @@ let errorLog
 
 
 
-
 // postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
 const conString = (() => {
     let user   = env.QWI_POSTGRES_USER
@@ -84,26 +83,31 @@ const conString = (() => {
 })()
 
 
+
 const uploadFile = (tableName, filePath, cb) => {
 
   let delayedCb = () => setTimeout(cb, 1500)
 
   pg.connect(conString, (err, client, done) => {
 
+      // These are used to make sure actions are not repeated.
       let calledBack = false
+      let loggedError = false
 
       let errorHandler = (err) => {
-        let errorString = `\nError uploading ${filePath}.\n` + err.stack + '\n\n'
-        console.log(errorString)
-        errorLog = (errorLog || fs.createWriteStream(errorLogPath))
-        errorLog.write(errorString)
+        if (!loggedError) {
+          loggedError = true
+          let errorString = `\nError uploading ${filePath}.\n` + err.stack + '\n\n'
+          console.log(errorString)
+          errorLog = (errorLog || fs.createWriteStream(errorLogPath))
+          errorLog.write(errorString)
+        }
         done(client)
         if (!calledBack) return ((calledBack = true) && delayedCb())
       }
 
       let gunzipper = zlib.createGunzip().on('error', errorHandler)
 
-      //let copyToDBStream = client.query(copyFrom(`COPY ${tableName} FROM STDIN DELIMITER ',' CSV HEADER`))ww
       let copyToDBStream = client.query(copyFrom(`COPY ${tableName} FROM STDIN DELIMITER ',' CSV HEADER`))
 
       copyToDBStream.on('error', errorHandler)
@@ -175,5 +179,5 @@ async.series(loadTableTasks, () => {
     `)
   }
 
-  dbService.end()
+  pg.end()
 })
