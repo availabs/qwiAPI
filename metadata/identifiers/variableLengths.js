@@ -8,7 +8,7 @@ module.exports = {
   periodicity: 1, // Periodicity of report
   seasonadj:   1, // Seasonal Adjustment Indicator
   geo_level:   1, // Group: Geographic level of aggregation
-  geography:   8, // Group: Geography code
+  geography:   7, // Group: Geography code
   ind_level:   1, // Group: Industry level of aggregation
   industry:    5, // Group: Industry code
   ownercode:   3, // Group: Ownership group code

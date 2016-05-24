@@ -4,9 +4,9 @@
 const _ = require('lodash')
 const async = require('async')
 
-const categoryVariableLengths = require('../../metadata/indentifiers').variableLengths
+const categoryVariableLengths = require('../../metadata/identifiers').variableLengths
 
-const categoryNamesRegExp = new RegExp(require('../../metadata/indentifiers').names.map(name => `^${name}`).join('|'))
+const categoryNamesRegExp = new RegExp(require('../../metadata/identifiers').names.map(name => `^${name}`).join('|'))
 
 const categoricalVariableLabels = require('../../metadata/labels/categorical_variables')
 

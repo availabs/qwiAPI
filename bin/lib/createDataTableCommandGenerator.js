@@ -1,4 +1,4 @@
-const vLens = require('../../metadata/indentifiers').variableLengths
+const vLens = require('../../metadata/identifiers').variableLengths
 
 module.exports = (dataTableName) => 
 

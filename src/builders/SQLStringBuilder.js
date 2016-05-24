@@ -3,7 +3,7 @@
 
 const _ = require('lodash')
 
-const categoryVariableDefaults = require('../../metadata/indentifiers').variableDefaults
+const categoryVariableDefaults = require('../../metadata/identifiers').variableDefaults
 
 const defaultCategoryPredicates = _.reduce(categoryVariableDefaults, (acc, defaultValue, categoryName) => {
                                             acc[categoryName] = [defaultValue]

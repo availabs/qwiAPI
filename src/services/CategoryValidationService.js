@@ -18,8 +18,8 @@ Only certain combinations of demographic and firm categories are valid. This is 
 const _ = require('lodash')
 
 
-const demographicCategories = require('../../metadata/indentifiers').demographicCategories
-const firmCategories = require('../../metadata/indentifiers').firmCategories
+const demographicCategories = require('../../metadata/identifiers').demographicCategories
+const firmCategories = require('../../metadata/identifiers').firmCategories
 
 const validDemographicCategoryCombinations = require('../../metadata/tables').validDemographicCategoryCombinations 
 
