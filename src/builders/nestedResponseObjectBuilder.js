@@ -1,5 +1,6 @@
 'use strict'
 
+const _ = require('lodash')
 
 const build = (parsedQueryObject, cb) => {
   
@@ -15,6 +16,7 @@ const build = (parsedQueryObject, cb) => {
     let cur
     let column
     let i, j
+    let data
 
     for (i = 0; i < rows.length; ++i) {
       
@@ -31,7 +33,16 @@ const build = (parsedQueryObject, cb) => {
       // The last column in the nesting.
       column = nestingCategories[j];
 
-      (cur[row[column]] || (cur[row[column]] = [])).push(row)
+      data = (parsedQueryObject.denseResult) ? _.omit(row, nestingCategories) : row;
+
+      if (parsedQueryObject.flatLeaves) {
+        if (cur[row[column]]) {
+          throw new Error('Flat leaves requested, but data at leaves is 2-dimensional.')
+        }
+        cur[row[column]] = data
+      } else {
+        (cur[row[column]] || (cur[row[column]] = [])).push(data)
+      }
     }
 
     return cb(null, nestedResult)

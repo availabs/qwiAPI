@@ -143,12 +143,22 @@ const parse = (request, cb) => {
 
       let flatResult = !!(query && query.flat && (query.flat.toLowerCase() === 'true'))
 
+      let denseResult = !!(query && query.dense && (query.dense.toLowerCase() === 'true'))
+
+      if (flatResult && denseResult) {
+        throw new Error("Results cannot be both flat and dense.") 
+      }
+
+      let flatLeaves = !!(query && query.flatLeaves && (query.flatLeaves.toLowerCase() === 'true'))
+
       return cb(null, {
         tableName          : tableName,
         categoryNames      : categoryNames,
         categoryPredicates : categoryPredicates,
         fields             : fields,
         flatResult         : flatResult,
+        denseResult        : denseResult,
+        flatLeaves         : flatLeaves,
       })
     })
 
