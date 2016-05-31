@@ -15,6 +15,7 @@ const build = (parsedQueryObject, cb) => {
     let nestedResult = {}
     let cur
     let column
+    let value
     let i, j
     let data
 
@@ -27,21 +28,23 @@ const build = (parsedQueryObject, cb) => {
       cur = nestedResult
       for (j = 0; j < (nestingCategories.length - 1); ++j) {
         column = nestingCategories[j] 
-        cur = (cur[row[column]] || (cur[row[column]] = {}))
+        value = (row[column] && row[column].trim) ? row[column].trim() : row[column]
+        cur = (cur[value] || (cur[value] = {}))
       }
 
       // The last column in the nesting.
       column = nestingCategories[j];
+      value = (row[column] && row[column].trim) ? row[column].trim() : row[column]
 
       data = (parsedQueryObject.denseResult) ? _.omit(row, nestingCategories) : row;
 
       if (parsedQueryObject.flatLeaves) {
-        if (cur[row[column]]) {
+        if (cur[value]) {
           throw new Error('Flat leaves requested, but data at leaves is 2-dimensional.')
         }
-        cur[row[column]] = data
+        cur[value] = data
       } else {
-        (cur[row[column]] || (cur[row[column]] = [])).push(data)
+        (cur[value] || (cur[value] = [])).push(data)
       }
     }
 
