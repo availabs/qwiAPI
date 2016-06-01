@@ -24,4 +24,4 @@ services:
       env_file: "../config/postgres_db.env"
       environment:
         - PGDATA=/data
-        - POSTGRES_PASSWORD=QWI_API
+        #- POSTGRES_PASSWORD=QWI_API
