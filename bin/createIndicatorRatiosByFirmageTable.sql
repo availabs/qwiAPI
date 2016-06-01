@@ -152,3 +152,4 @@ DROP INDEX IF EXISTS indicator_ratios_by_firmage_index;
 CREATE INDEX indicator_ratios_by_firmage_index ON indicator_ratios_by_firmage (geography, year, quarter);
 
 CLUSTER indicator_ratios_by_firmage USING indicator_ratios_by_firmage_index;
+
