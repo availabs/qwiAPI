@@ -98,3 +98,6 @@ Notes on the API
 
 FIXME:
   Status flags yield "indicator not recognized" flag.
+
+
+/derived-data/measure-ratios-by-firmage/geography3410900/year/quarter/industry/firmage?fields=emp_ratio&fields=payroll_ratio

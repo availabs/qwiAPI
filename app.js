@@ -17,6 +17,13 @@ const labels = require('./metadata/labels')
 
 const parseRequest = require('./src/services/QueryParsingService').parse
 const buildSQLString = require('./src/builders/SQLStringBuilder').buildSQLString
+
+const parseMeasureRatiosByFirmageRequest = 
+        require('./src/services/MeasureRatiosByFirmageQueryParsingService').parse
+const buildMeasureRatiosByFirmageSQLString = 
+        require('./src/builders/MeasureRatiosByFirmageSQLStringBuilder').buildSQLString
+
+
 const handleParsedQueryObject = require('./src/services/DBService').handleParsedQueryObject
 const buildNestedResponseObject = require('./src/builders/nestedResponseObjectBuilder').build
 
@@ -24,10 +31,10 @@ const port = (env.PORT || 10101)
 
 
 app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
+  res.header("Access-Control-Allow-Origin", "*")
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+  next()
+})
 
 
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -45,9 +52,8 @@ app.get('/metadata/labels', (req, res) => {
   return res.status(200).send(labels)
 })
 
-app.get('/data/*', (req, res) => {
 
-console.log(req.url)
+app.get('/data/*', (req, res) => {
 
     let chain = [
       parseRequest.bind(null, req),
@@ -64,6 +70,27 @@ console.log(req.url)
       return res.status(200).send({ data: data })
     })
 })
+
+
+
+app.get('/derived-data/measure-ratios-by-firmage/*', (req, res) => {
+
+    let chain = [
+      parseMeasureRatiosByFirmageRequest.bind(null, req),
+      buildMeasureRatiosByFirmageSQLString,
+      handleParsedQueryObject,
+      buildNestedResponseObject,
+    ]
+
+    async.waterfall(chain, (err, data) => {
+      if (err) {
+        return handleError(res, err)
+      }
+
+      return res.status(200).send({ data: data })
+    })
+})
+
 
 
 app.listen(port, function () {
