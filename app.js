@@ -47,6 +47,15 @@ const handleError = (res, err) => {
   res.status(500).send({ error: err.message })
 }
 
+app.get('/', (req, res) => res.status(200).send({
+  message: "Documentation page not yet created.",
+  sampleURLs: [
+    req.protocol + '://' + req.get('host') + req.originalUrl +
+      'data/geography3410900/industry31-33/year20102015/quarter?fields=emp&fields=payroll&dense=true',
+    req.protocol + '://' + req.get('host') + req.originalUrl +
+      'derived-data/measure-ratios-by-firmage/geography0110700/year/quarter/industry/firmage?fields=emp_ratio&fields=payroll_ratio',
+  ]
+}))
 
 app.get('/metadata/labels', (req, res) => {
   return res.status(200).send(labels)
