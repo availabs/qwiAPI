@@ -60,7 +60,7 @@ function buildSQLString (parsedQueryObject, cb) {
                     // For prefix matching, we remove the zero padding if it exists.
                     // Because some state fips codes start with zero, we must take care 
                     // not to remove the leading zeroes of the padded fips code... thus the `{2,5}`.
-                    let codes = reqCategoryValues.map(code => code.replace(/^0{2,6}/, ''))
+                    let codes = reqCategoryValues.map(code => code.replace(/^0{2,5}/, ''))
                     return '(' +  codes.map(code => `(geography = '${code}')`).join(' OR ') + ')'
                 }
 
