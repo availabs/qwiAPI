@@ -35,8 +35,6 @@ function runQuery (query, callback) {
   // get a pg client from the connection pool
   return pg.connect(conString, function(err, client, done) {
 
-console.log(conString)
-
       var handleError = function(err) {
           if(!err) { return false }
 
