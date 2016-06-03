@@ -48,12 +48,10 @@ const handleError = (res, err) => {
 }
 
 app.get('/', (req, res) => res.status(200).send({
-  message: "Documentation page not yet created.",
+  message: "Documentation page not yet created. Route structures follows the patterns in the BDS API (http://bds.availabs.org/), while sticking to the QWI variable names (http://lehd.ces.census.gov/data/schema/latest/lehd_public_use_schema.html)",
   sampleURLs: [
-    req.protocol + '://' + req.get('host') + req.originalUrl +
-      'data/geography3410900/industry31-33/year20102015/quarter?fields=emp&fields=payroll&dense=true',
-    req.protocol + '://' + req.get('host') + req.originalUrl +
-      'derived-data/measure-ratios-by-firmage/geography0110700/year/quarter/industry/firmage?fields=emp_ratio&fields=payroll_ratio',
+    'http://qwi.availabs.org/data/geography3410900/industry31-33/year20102015/quarter?fields=emp&fields=payroll&dense=true',
+    'http://qwi.availabs.org/derived-data/measure-ratios-by-firmage/geography0110700/year/quarter/industry/firmage?fields=emp_ratio&fields=payroll_ratio',
   ]
 }))
 
