@@ -20,14 +20,14 @@ AS SELECT
   SUM(hiraend) AS hiraend,
   SUM(sepbeg) AS sepbeg,
   (SUM(hiraend) - SUM(frmjbgn)) AS hiraendrepl,
-  (2 * SUM(hiraend) / cast((SUM(emp) + SUM(empend)) AS FLOAT)) AS hiraendr,
-  ((2 * SUM(sepbeg)) / cast((SUM(emp) + SUM(empend)) AS FLOAT)) AS sepbegr,
-  ((2 * (SUM(hiraend) - SUM(frmjbgn))) / cast((SUM(emp) + SUM(empend)) AS FLOAT )) AS hiraendreplr,
+  (2 * SUM(hiraend) / nullif(cast((SUM(emp) + SUM(empend)) AS FLOAT), 0)) AS hiraendr,
+  ((2 * SUM(sepbeg)) / nullif(cast((SUM(emp) + SUM(empend)) AS FLOAT), 0)) AS sepbegr,
+  ((2 * (SUM(hiraend) - SUM(frmjbgn))) / nullif(cast((SUM(emp) + SUM(empend)) AS FLOAT ),0)) AS hiraendreplr,
   SUM(hiras) AS hiras,
   SUM(hirns) AS hirns,
   SUM(seps) AS seps,
   SUM(sepsnx) AS sepsnx,
-  ((SUM(hiras) + SUM(sepsnx)) / cast((2 * SUM(emps)) AS FLOAT)) AS turnovrs,
+  ((SUM(hiras) + SUM(sepsnx)) / nullif(cast((2 * SUM(emps)) AS FLOAT), 0)) AS turnovrs,
   SUM(frmjbgn) AS frmjbgn,
   SUM(frmjbls) AS frmjbls,
   SUM(frmjbc) AS frmjbc,
@@ -46,3 +46,8 @@ WHERE (sex = '0') AND (agegrp = 'A00') and (char_length(geography) > 2)
 GROUP BY substring(geography, 3, 5), year, quarter, industry, firmage
 HAVING COUNT(emp) > 1;
 
+DROP INDEX IF EXISTS msa_eea_view_index;
+CREATE INDEX msa_eea_view_index ON msa_eea_view (geography, year, quarter) WITH (fillfactor = 100);
+
+CLUSTER VERBOSE msa_eea_view USING msa_eea_view_index;
+ 
