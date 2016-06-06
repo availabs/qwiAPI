@@ -3,6 +3,8 @@
 
 const _ = require('lodash')
 
+const tableName = 'indicator_ratios_by_firmage'
+
 const queryableCategories = ['firmage', 'geography', 'industry', 'quarter', 'year']
 
 const supportedIndicators = 
@@ -114,8 +116,6 @@ const validateRequestedFields = requestedFields => {
                 ((unsupportedFields.length > 1) ? 's are ' : ' is ') +
                 'not recognized: [' + unsupportedFields.join(', ') + '].\n')
     } 
-
-    return 
 }
 
 
@@ -155,8 +155,6 @@ const parse = (request, cb) => {
 
     validateRequestedFields(fields)
 
-    let tableName = 'indicator_ratios_by_firmage'
-
     let flatResult = !!(query && query.flat && (query.flat.toLowerCase() === 'true'))
 
     let denseResult = !!(query && query.dense && (query.dense.toLowerCase() === 'true'))
@@ -177,9 +175,7 @@ const parse = (request, cb) => {
       flatLeaves         : flatLeaves,
     })
 
-  } catch (e) {
-    return cb(e)
-  }
+  } catch (e) { return cb(e) }
 }
 
 
