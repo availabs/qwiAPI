@@ -53,6 +53,11 @@ function buildSQLString (parsedQueryObject, cb) {
                     return '(' +  codes.map(code => `(geography = '${code}')`).join(' OR ') + ')'
                 }
 
+                if (categoryName === 'industry') {
+                    let codes = reqCategoryValues.map(code => code.replace(/^0{3}/, ''))
+                    return '(' +  codes.map(code => `(industry = '${code}')`).join(' OR ') + ')'
+                }
+
                 // Years and quarters are numeric data types in the table.
                 if (categoryName === 'quarter') {
                     let quarters = reqCategoryValues.map(i => parseInt(i))
