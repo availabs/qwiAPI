@@ -23,6 +23,11 @@ const parseMeasureRatiosByFirmageRequest =
 const buildMeasureRatiosByFirmageSQLString = 
         require('./src/builders/MeasureRatiosByFirmageSQLStringBuilder').buildSQLString
 
+const parseAtlasMSAViewRequest =
+        require('./src/services/AtlasMSAViewQueryParsingService').parse
+const buildAtlasMSAViewSQLString = 
+        require('./src/builders/AtlasMSAViewSQLStringBuilder').buildSQLString
+
 
 const handleParsedQueryObject = require('./src/services/DBService').handleParsedQueryObject
 const buildNestedResponseObject = require('./src/builders/nestedResponseObjectBuilder').build
@@ -85,6 +90,25 @@ app.get('/derived-data/measure-ratios-by-firmage/*', (req, res) => {
     let chain = [
       parseMeasureRatiosByFirmageRequest.bind(null, req),
       buildMeasureRatiosByFirmageSQLString,
+      handleParsedQueryObject,
+      buildNestedResponseObject,
+    ]
+
+    async.waterfall(chain, (err, data) => {
+      if (err) {
+        return handleError(res, err)
+      }
+
+      return res.status(200).send({ data: data })
+    })
+})
+
+
+app.get('/derived-data/msa-eea/*', (req, res) => {
+
+    let chain = [
+      parseAtlasMSAViewRequest.bind(null, req),
+      buildAtlasMSAViewSQLString,
       handleParsedQueryObject,
       buildNestedResponseObject,
     ]

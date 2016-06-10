@@ -25,7 +25,7 @@ const getCategoryName = (requestedCategoryPredicate) => {
   // If the category is not recognized, throw an error.
   // This prevents running futile queries, gives meaningful errors to client, and guards agains SQL-injection.
   if (!categoryMatch) {
-    throw new Error(`Invalid category query: unrecognized category in ${requestedCategoryPredicate}`)
+    throw new Error(`Invalid category: unrecognized category in ${requestedCategoryPredicate}`)
   }
 
   return categoryMatch[0]

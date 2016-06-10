@@ -18,7 +18,7 @@
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "node-env-file": "^0.1.8",
-    "pg": "^4.5.5",
+    "pg": "^5.0.0",
     "pg-copy-streams": "^0.3.0"
   }
 }
