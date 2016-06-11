@@ -15,18 +15,15 @@ const async = require('async')
 
 const labels = require('./metadata/labels')
 
-const parseRequest = require('./src/services/QueryParsingService').parse
+const parseQuery = require('./src/services/QueryParsingService').parse
 const buildSQLString = require('./src/builders/SQLStringBuilder').buildSQLString
 
-const parseMeasureRatiosByFirmageRequest = 
-        require('./src/services/MeasureRatiosByFirmageQueryParsingService').parse
-const buildMeasureRatiosByFirmageSQLString = 
-        require('./src/builders/MeasureRatiosByFirmageSQLStringBuilder').buildSQLString
+const derivedDataQueryParsingService = require('./src/services/DerivedDataQueryParsingService')
 
-const parseAtlasMSAViewRequest =
-        require('./src/services/AtlasMSAViewQueryParsingService').parse
-const buildAtlasMSAViewSQLString = 
-        require('./src/builders/AtlasMSAViewSQLStringBuilder').buildSQLString
+const parseMeasureRatiosByFirmageQuery = derivedDataQueryParsingService.parseMeasureRatiosByFirmageQuery
+const parseInterstateMSAViewQuery = derivedDataQueryParsingService.parseInterstateMSAViewQuery
+
+const buildDerivedDataQuerySQLString = require('./src/builders/DerivedDataQuerySQLStringBuilder').buildSQLString
 
 
 const handleParsedQueryObject = require('./src/services/DBService').handleParsedQueryObject
@@ -68,7 +65,7 @@ app.get('/metadata/labels', (req, res) => {
 app.get('/data/*', (req, res) => {
 
     let chain = [
-      parseRequest.bind(null, req),
+      parseQuery.bind(null, req),
       buildSQLString,
       handleParsedQueryObject,
       buildNestedResponseObject,
@@ -88,8 +85,8 @@ app.get('/data/*', (req, res) => {
 app.get('/derived-data/measure-ratios-by-firmage/*', (req, res) => {
 
     let chain = [
-      parseMeasureRatiosByFirmageRequest.bind(null, req),
-      buildMeasureRatiosByFirmageSQLString,
+      parseMeasureRatiosByFirmageQuery.bind(null, req),
+      buildDerivedDataQuerySQLString,
       handleParsedQueryObject,
       buildNestedResponseObject,
     ]
@@ -104,11 +101,11 @@ app.get('/derived-data/measure-ratios-by-firmage/*', (req, res) => {
 })
 
 
-app.get('/derived-data/msa-eea/*', (req, res) => {
+app.get('/derived-data/interstate-msa/*', (req, res) => {
 
     let chain = [
-      parseAtlasMSAViewRequest.bind(null, req),
-      buildAtlasMSAViewSQLString,
+      parseInterstateMSAViewQuery.bind(null, req),
+      buildDerivedDataQuerySQLString,
       handleParsedQueryObject,
       buildNestedResponseObject,
     ]
