@@ -27,12 +27,11 @@ function buildSQLString (parsedQueryObject, cb) {
                                        parsedQueryObject.defaultCategoryPredicates)
 
 
-      // If no geography codes are provided, we default to returning the data for all the states.
       if (_.isEmpty(wherePredicates.geography)) {
         return cb(new Error('For metro-level queries, you must specify the metro codes to return.'))
       }
 
-     parsedQueryObject.sqlStatement = 
+      parsedQueryObject.sqlStatement = 
         'SELECT ' + toSelect.join(', ') + '\n' +
         'FROM '   + parsedQueryObject.tableName + '\n' + 
         'WHERE ' + 

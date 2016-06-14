@@ -167,15 +167,15 @@ const parse = (meta, cb) => {
     let flatLeaves = !!(query && query.flatLeaves && (query.flatLeaves.toLowerCase() === 'true'))
 
     return cb(null, {
-      tableName              : meta.tableName,
-      categoryNames          : categoryNames,
-      categoryPredicates     : categoryPredicates,
-      fields                 : fields,
-      flatResult             : flatResult,
-      denseResult            : denseResult,
-      flatLeaves             : flatLeaves,
-      alwaysSelected           : meta.alwaysSelected,
-      categoryVariableDefaults : meta.categoryVariableDefaults,
+      tableName                 : meta.tableName,
+      categoryNames             : categoryNames,
+      categoryPredicates        : categoryPredicates,
+      defaultCategoryPredicates : meta.defaultCategoryPredicates,
+      fields                    : fields,
+      flatResult                : flatResult,
+      denseResult               : denseResult,
+      flatLeaves                : flatLeaves,
+      alwaysSelected            : meta.alwaysSelected,
     })
 
   } catch (e) { return cb(e) }
@@ -210,7 +210,7 @@ const parseMeasureRatiosByFirmageQuery = (request, cb) => {
   meta.supportedIndicators = supportedRatioIndicators,
   meta.supportedFields     = _.union(meta.queryableCategories, supportedRatioIndicators)
 
-  meta.categoryVariableDefaults = _.mapValues(_.pick(variableDefaults, 'industry'), (x => [x]))
+  meta.defaultCategoryPredicates = _.mapValues(_.pick(variableDefaults, 'industry'), (x => [x]))
   meta.categoricalVariableLabels.firmage = _.omit(meta.categoricalVariableLabels.firmage, '0')
   meta.alwaysSelected = ['firmage', 'geography', 'year', 'quarter']
 
@@ -227,7 +227,7 @@ const parseInterstateMSAViewQuery = (request, cb) => {
 
   meta.alwaysSelected = ['geography', 'year', 'quarter']
 
-  meta.categoryVariableDefaults = _.mapValues(_.pick(variableDefaults, 'industry', 'firmage'), (x => [x]))
+  meta.defaultCategoryPredicates = _.mapValues(_.pick(variableDefaults, 'industry', 'firmage'), (x => [x]))
 
   return parse(meta, cb)
 }
