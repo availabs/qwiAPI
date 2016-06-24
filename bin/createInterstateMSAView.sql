@@ -1,6 +1,6 @@
-DROP MATERIALIZED VIEW IF EXISTS interstate_msa_view;
+DROP MATERIALIZED VIEW IF EXISTS interstate_msa_view_2;
 
-CREATE MATERIALIZED VIEW interstate_msa_view
+CREATE MATERIALIZED VIEW interstate_msa_view_2
 AS SELECT 
     substring(geography FROM 3 for 5) AS geography, 
     year, 
@@ -44,10 +44,10 @@ AS SELECT
   FROM sa_fa_gm_ns_op_u 
   WHERE (sex = '0') AND (agegrp = 'A00') and (char_length(geography) > 2)
   GROUP BY substring(geography, 3, 5), year, quarter, industry, firmage
-  HAVING COUNT(emp) > 1;
+  HAVING COUNT(year) > 1;
 
-DROP INDEX IF EXISTS interstate_msa_view_index;
-CREATE INDEX interstate_msa_view_index ON interstate_msa_view (geography, year, quarter) WITH (fillfactor = 100);
+DROP INDEX IF EXISTS interstate_msa_view_index_2;
+CREATE INDEX interstate_msa_view_index_2 ON interstate_msa_view_2 (geography, year, quarter) WITH (fillfactor = 100);
 
-CLUSTER VERBOSE interstate_msa_view USING interstate_msa_view_index;
+CLUSTER VERBOSE interstate_msa_view_2 USING interstate_msa_view_index_2;
  
