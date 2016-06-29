@@ -42,12 +42,17 @@ AS SELECT
     SUM(payroll) AS payroll 
 
   FROM sa_fa_gm_ns_op_u 
-  WHERE (sex = '0') AND (agegrp = 'A00') and (char_length(geography) > 2)
-  GROUP BY substring(geography, 3, 5), year, quarter, industry, firmage
-  HAVING COUNT(year) > 1;
+  WHERE (sex = '0') AND (agegrp = 'A00') and (substring(geography, 3, 5) IN (
+    SELECT substring(geography, 3, 5)
+    FROM (select distinct t.geography from sa_fa_gm_ns_op_u as t) AS t2 
+    GROUP BY substring(geography, 3, 5)
+    HAVING COUNT(*) > 1 
+    ORDER BY substring(geography, 3, 5)
+  ))
+  GROUP BY substring(geography, 3, 5), year, quarter, industry, firmage;
 
-DROP INDEX IF EXISTS interstate_msa_view_index_2;
-CREATE INDEX interstate_msa_view_index_2 ON interstate_msa_view_2 (geography, year, quarter) WITH (fillfactor = 100);
+DROP INDEX IF EXISTS interstate_msa_view_index;
+CREATE INDEX interstate_msa_view_index ON interstate_msa_view_2 (geography, year, quarter) WITH (fillfactor = 100);
 
-CLUSTER VERBOSE interstate_msa_view_2 USING interstate_msa_view_index_2;
+CLUSTER VERBOSE interstate_msa_view_2 USING interstate_msa_view_index;
  
