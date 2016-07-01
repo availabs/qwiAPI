@@ -12,13 +12,16 @@
 - [Additional Parameters](#sec-6)
 - [Notes for Developers](#sec-7)
 
+_NOTE: This documentation page is a work in progress._
+
 # Introduction<a id="sec-1" name="sec-1"></a>
+
 
 This project was created under a grant from the [Ewing Marion Kauffman Foundation](http://www.kauffman.org/).
 
 This repository contains code for an JSON API to 
 the U.S. Census Bureau's Quarterly Workforce Indicators 
-[(QWI)](http://lehd.ces.census.gov/data/) dataset.
+([QWI](http://lehd.ces.census.gov/data/)) dataset.
 This application focuses on the Metropolitian level data from the QWI
 due to the fact that the county level data takes over 2T of disk space.
 
@@ -58,8 +61,8 @@ From the [Quarterly Workforce Indicators 101](http://lehd.ces.census.gov/doc/QWI
 > microdata. The LEHD data is massive longitudinal database covering over 95% of U.S. private sector
 > jobs. Much of this data is collected via a unique federal-state data sharing collaboration, the Local Employment
 > Dynamics (LED) partnership. LED is a cooperative venture between the LEHD program at the U.S. Census
-> Bureau and state agencies of all 50 states, the District of Columbia, Puerto Rico, and the U.S. Virgin Islands2
-> .
+> Bureau and state agencies of all 50 states, the District of Columbia, Puerto Rico, and the U.S. Virgin Islands2.
+>
 > Partner states voluntarily submit quarterly data files from existing administrative record systems, which are
 > combined with a range of other data sources to generate public use products, including QWI and LODES (LEHD
 > Origin-Destination Employment Statistics, presented in OnTheMap) and other new products in development. By
@@ -68,7 +71,7 @@ From the [Quarterly Workforce Indicators 101](http://lehd.ces.census.gov/doc/QWI
 
 The data from the U.S. Census Bureau is available tabulated to 
 national, state, metropolitan/micropolitan areas, county, and Workforce Investment Board (WIB) areas,
-however *this API only serves the metropolitian level data*.
+however *this API only serves data found in the metropolitian-level CSVs*.
 
 
 # Dynamic Routes<a id="sec-3" name="sec-3"></a>
@@ -99,7 +102,7 @@ The required code lengths for the route parameters are specified below in the [A
 
 Each of the categories listed in the following table
 can appear as a segment in the dynamic route.
-Consequently they can be used to specify the JSON response structure
+Consequently, they can be used to specify the JSON response structure
 and to filter the information in the response.
 Values specified as filters *must be zero-padded* if the requested value
 is less than the length specified in the following table.
@@ -178,13 +181,13 @@ is less than the length specified in the following table.
 
     <tr>
       <td class="left">year</td>
-      <td class="left">4</
+      <td class="left">4</td>
       <td class="left">Year</td>
     </tr>
 
     <tr>
       <td class="left">quarter</td>
-      <td class="left">1</
+      <td class="left">1</td>
       <td class="left">Quarter</td>
     </tr>
   </tbody>
@@ -227,14 +230,16 @@ The following categories can be used in combination with any others:
 * year
 * quarter
 
-The supported demographic and establishment category interactions shown in the 
-following table.
+In fact, _'geography' is required in all requests_. (The dataset is too large to return all geographies by default.)
+
+For the sake clarity, supported demographic and establishment category interactions shown in the following table.
 
 ### Supported Demographic and Establishment Category Interactions
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
   <colgroup>
-    <col class="left" />
+    <col class="center" />
+    <col class="center" />
     <col class="left" />
     <col class="left" />
   </colgroup>
@@ -243,51 +248,44 @@ following table.
     <tr>
       <th scope="col" class="left">Demographic Categories</th>
       <th scope="col" class="left">Firm Categories</th>
-      <th scope="col" class="left">Route Segments</th>
       <th scope="col" class="left">Description</th>
     </tr>
   </thead>
 
   <tbody>
     <tr>
-      <td class="left">[sa]</td>
-      <td class="left">[fa]</td>
-      <td class="left">sex, agegrp, and firmage</td>
+      <td class="left">sex & agegrp</td>
+      <td class="left">firmage</td>
       <td class="left">Employee sex and age, and firm age</td>
     </tr>
 
     <tr>
-      <td class="left">[se]</td>
-      <td class="left">[fa]</td>
-      <td class="left">sex, education, and firmage</td>
+      <td class="left">sex & education</td>
+      <td class="left">firmage</td>
       <td class="left">Employee sex and education level, and firm age</td>
     </tr>
 
     <tr>
-      <td class="left">[rh]</td>
-      <td class="left">[fa]</td>
-      <td class="left">race, ethnicity, and firmage</td>
+      <td class="left">race & ethnicity</td>
+      <td class="left">firmage</td>
       <td class="left">Employee race and ethnicity, and firm age</td>
     </tr>
 
     <tr>
-      <td class="left">[sa]</td>
-      <td class="left">[fs]</td>
-      <td class="left">sex, agegrp, and firmsize</td>
+      <td class="left">sex & agegrp</td>
+      <td class="left">firmsize</td>
       <td class="left">Employee sex and age, and firm size</td>
     </tr>
 
     <tr>
-      <td class="left">[se]</td>
-      <td class="left">[fs]</td>
-      <td class="left">sex, education, and firmsize</td>
+      <td class="left">sex & education</td>
+      <td class="left">firmsize</td>
       <td class="left">Employee sex and education level, and firm size</td>
     </tr>
 
     <tr>
-      <td class="left">[rh]</td>
-      <td class="left">[fs]</td>
-      <td class="left">race, ethnicity, and firmsize</td>
+      <td class="left">race & ethnicity</td>
+      <td class="left">firmsize</td>
       <td class="left">Employee race and ethnicity, and firm size</td>
     </tr>
   </tbody>
