@@ -1,18 +1,19 @@
-- [Introduction](#sec-1)
-- [Dynamic Routes](#sec-2)
-  - [Establishment Data](#sec-2-1)
-  - [Firm Data](#sec-2-2)
-- [Additional Route Segments](#sec-3)
-- [Route Conditions](#sec-4)
-- [Codes](#sec-5)
-  - [Firm Age](#sec-5-1)
-  - [Firm Size & Initial Firm Size](#sec-5-2)
-  - [Establishment Age](#sec-5-3)
-  - [Establishment Size and Initial Establishment Size](#sec-5-4)
-- [Additional Parameters](#sec-6)
-- [Notes for Developers](#sec-7)
-
 _NOTE: This documentation page is a work in progress._
+
+- [Introduction](#sec-1)
+- [QWI Dataset Overview](#sec-2)
+- [Additional Route Segments](#sec-3)
+  - [Specifying the Response Structure](#sec-3-1)
+  - [Supported Category Combinations](#sec-3-2)
+    - [Supported Demographic and Establishment Category Interactions](#sec-3-2-1)
+- [Category Codes](#sec-4)
+    - [agegrp](#sec-4-1)
+    - [education](#sec-4-2)
+    - [ethnicity](#sec-4-3)
+    - [race](#sec-4-4)
+    - [firmage](#sec-4-5)
+    - [firmsize](#sec-4-6)
+
 
 # Introduction<a id="sec-1" name="sec-1"></a>
 
@@ -76,7 +77,7 @@ however *this API only serves data found in the metropolitian-level CSVs*.
 
 # Dynamic Routes<a id="sec-3" name="sec-3"></a>
 
-## Specifying the Response Structure
+## Specifying the Response Structure<a id="sec-3-1" name="sec-3-1"></a>
 The `qwiAPI` features _Dynamic Routes_ that allow clients to query the dataset
 based on worker demographics, employer characteristics, and/or industry,
 The server response will be in the form of a JSON object
@@ -98,7 +99,7 @@ Notice that the industry value is zero-padded.
 
 The required code lengths for the route parameters are specified below in the [API Syntax]() section.
 
-## Supported query parameters and their lengths
+## Supported query parameters and their lengths<a id="sec-3-2" name="sec-3-2"></a>
 
 Each of the categories listed in the following table
 can appear as a segment in the dynamic route.
@@ -197,9 +198,7 @@ A more detailed explanation of the routing syntax follows in the [API Syntax]() 
 and examples can be found in the [Examples]() section.
 
 
-<!--data/year2008/quarter/geography/industry004244-45/firmage012345/-->
-
-## Supported category combinations
+## Supported category combinations<a id="sec-2-1" name="sec-3-2-1"></a>
 
 From the [Quarterly Workforce Indicators 101](http://lehd.ces.census.gov/doc/QWI_101.pdf) document:
 
@@ -248,7 +247,6 @@ For the sake clarity, supported demographic and establishment category interacti
     <tr>
       <th scope="col" class="left">Demographic Categories</th>
       <th scope="col" class="left">Firm Categories</th>
-      <th scope="col" class="left">Description</th>
     </tr>
   </thead>
 
@@ -256,37 +254,31 @@ For the sake clarity, supported demographic and establishment category interacti
     <tr>
       <td class="left">sex & agegrp</td>
       <td class="left">firmage</td>
-      <td class="left">Employee sex and age, and firm age</td>
     </tr>
 
     <tr>
       <td class="left">sex & education</td>
       <td class="left">firmage</td>
-      <td class="left">Employee sex and education level, and firm age</td>
     </tr>
 
     <tr>
       <td class="left">race & ethnicity</td>
       <td class="left">firmage</td>
-      <td class="left">Employee race and ethnicity, and firm age</td>
     </tr>
 
     <tr>
       <td class="left">sex & agegrp</td>
       <td class="left">firmsize</td>
-      <td class="left">Employee sex and age, and firm size</td>
     </tr>
 
     <tr>
       <td class="left">sex & education</td>
       <td class="left">firmsize</td>
-      <td class="left">Employee sex and education level, and firm size</td>
     </tr>
 
     <tr>
       <td class="left">race & ethnicity</td>
       <td class="left">firmsize</td>
-      <td class="left">Employee race and ethnicity, and firm size</td>
     </tr>
   </tbody>
 </table>
@@ -304,294 +296,290 @@ A more detailed explanation of the routing syntax follows in the [API Syntax]() 
 and examples can be found in the [Examples]() section.
 
 
-# Category Codes<a id="sec-6" name="sec-6"></a>
+# Category Codes<a id="sec-4" name="sec-4"></a>
 
 For reference, the 'Categorical Variables' section of the
 [Quarterly Workforce Indicators 101](http://lehd.ces.census.gov/doc/QWI_101.pdf) 
-document are included below:
-
-### agegrp
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="left" />
-    <col class="left" />
-    <col class="left" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="left">agegrp</th>
-      <th scope="col" class="left">label</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="left">A00</td>
-      <td class="left">All Ages (14-99)</td>
-    </tr>
-
-    <tr>
-      <td class="left">A01</td>
-      <td class="left">14-18</td>
-    </tr>
-    <tr>
-      <td class="left">A02</td>
-      <td class="left">19-21</td>
-    </tr>
-    <tr>
-      <td class="left">A03</td>
-      <td class="left">22-24</td>
-    </tr>
-    <tr>
-      <td class="left">A04</td>
-      <td class="left">25-34</td>
-    </tr>
-    <tr>
-      <td class="left">A05</td>
-      <td class="left">35-44</td>
-    </tr>
-    <tr>
-      <td class="left">A06</td>
-      <td class="left">45-54</td>
-    </tr>
-    <tr>
-      <td class="left">A07</td>
-      <td class="left">55-64</td>
-    </tr>
-    <tr>
-      <td class="left">A08</td>
-      <td class="left">65-99</td>
-    </tr>
-  </tbody>
-</table>
-
-
-### education
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="left" />
-    <col class="left" />
-    <col class="left" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="left">education</th>
-      <th scope="col" class="left">label</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="left">E0</td>
-      <td class="left">All Education Categories</td>
-    </tr>
-    <tr>
-      <td class="left">E1</td>
-      <td class="left">Less than high school</td>
-    </tr>
-    <tr>
-      <td class="left">E2</td>
-      <td class="left">High school or equivalent, no college</td>
-    </tr>
-    <tr>
-      <td class="left">E3</td>
-      <td class="left">Some college or Associate degree</td>
-    </tr>
-    <tr>
-      <td class="left">E4</td>
-      Bachelor’s degree or advanced degree
-    </tr>
-    <tr>
-      <td class="left">E5</td>
-      <td class="left">Educational attainment not available (workers aged 24 or younger)</td>
-    </tr>
-  </tbody>
-</table>
-
-### ethnicity
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="left" />
-    <col class="left" />
-    <col class="left" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="left">education</th>
-      <th scope="col" class="left">label</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="left">A0</td>
-      <td class="left">All Ethnicities</td>
-    </tr>
-    <tr>
-      <td class="left">A1</td>
-      <td class="left">Not Hispanic or Latino</td>
-    </tr>
-    <tr>
-      <td class="left">A2</td>
-      <td class="left">Hispanic or Latino</td>
-    </tr>
-  </tbody>
-</table>
-
-
-### race
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="left" />
-    <col class="left" />
-    <col class="left" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="left">race</th>
-      <th scope="col" class="left">label</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="left">A0</td>
-      <td class="left">All Races</td>
-    </tr>
-    <tr>
-      <td class="left">A1</td>
-      <td class="left">White Alone</td>
-    </tr>
-    <tr>
-      <td class="left">A2</td>
-      <td class="left">Black or African American Alone</td>
-    </tr>
-    <tr>
-      <td class="left">A3</td>
-      <td class="left">American Indian or Alaska Native Alone</td>
-    </tr>
-    <tr>
-      <td class="left">A4</td>
-      <td class="left">Asian Alone</td>
-    </tr>
-    <tr>
-      <td class="left">A5</td>
-      <td class="left">Native Hawaiian or Other Pacific Islander Alone</td>
-    </tr>
-    <tr>
-      <td class="left">A6</td>
-      <td class="left">Some Other Race Alone (Not Used)</td>
-    </tr>
-    <tr>
-      <td class="left">A6</td>
-      <td class="left">Two or More Race Groups</td>
-    </tr>
-  </tbody>
-</table>
-
-
-### firmage
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="left" />
-    <col class="left" />
-    <col class="left" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="left">firmage</th>
-      <th scope="col" class="left">label</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="left">0</td>
-      <td class="left">All Firm Ages</td>
-    </tr>
-    <tr>
-      <td class="left">A1</td>
-      <td class="left">0-1 Years</td>
-    </tr>
-    <tr>
-      <td class="left">2</td>
-      <td class="left">2-3 Years</td>
-    </tr>
-    <tr>
-      <td class="left">3</td>
-      <td class="left">4-5 Years</td>
-    </tr>
-    <tr>
-      <td class="left">4</td>
-      <td class="left">6-10 Years</td>
-    </tr>
-    <tr>
-      <td class="left">5</td>
-      <td class="left">11+ Years</td>
-    </tr>
-  </tbody>
-</table>
-
-### firmsize
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="left" />
-    <col class="left" />
-    <col class="left" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="left">firmsize</th>
-      <th scope="col" class="left">label</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="left">0</td>
-      <td class="left">0-19 Employees</td>
-    </tr>
-    <tr>
-      <td class="left">A1</td>
-      <td class="left">20-49 Employees</td>
-    </tr>
-    <tr>
-      <td class="left">2</td>
-      <td class="left">50-249 Employees</td>
-    </tr>
-    <tr>
-      <td class="left">3</td>
-      <td class="left">250-499 Employees</td>
-    </tr>
-    <tr>
-      <td class="left">4</td>
-      <td class="left">500+ Employees</td>
-    </tr>
-    <tr>
-      <td class="left">5</td>
-      <td class="left">
-    </tr>
-  </tbody>
-</table>
-
-
-Each of the above tables shows values that can be used to filter the response's information.
+document is included below.
+The left-hand column in each of the above tables 
+shows values that can be used to filter the response's information.
 Note that the above tables contain all the values in the domain of each category.
 If filter values outside of a category's domain are specified, an error 
 message will be sent to the client.
+
+### agegrp<a id="sec-4-1" name="sec-4-1"></a>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+  <colgroup>
+    <col class="center" />
+    <col class="center" />
+    <col class="center" />
+  </colgroup>
+
+  <thead>
+    <tr>
+      <th scope="col" class="center">agegrp</th>
+      <th scope="col" class="center">label</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td class="center">A00</td>
+      <td class="center">All Ages (14-99)</td>
+    </tr>
+
+    <tr>
+      <td class="center">A01</td>
+      <td class="center">14-18</td>
+    </tr>
+    <tr>
+      <td class="center">A02</td>
+      <td class="center">19-21</td>
+    </tr>
+    <tr>
+      <td class="center">A03</td>
+      <td class="center">22-24</td>
+    </tr>
+    <tr>
+      <td class="center">A04</td>
+      <td class="center">25-34</td>
+    </tr>
+    <tr>
+      <td class="center">A05</td>
+      <td class="center">35-44</td>
+    </tr>
+    <tr>
+      <td class="center">A06</td>
+      <td class="center">45-54</td>
+    </tr>
+    <tr>
+      <td class="center">A07</td>
+      <td class="center">55-64</td>
+    </tr>
+    <tr>
+      <td class="center">A08</td>
+      <td class="center">65-99</td>
+    </tr>
+  </tbody>
+</table>
+
+
+### education<a id="sec-4-2" name="sec-4-2"></a>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+  <colgroup>
+    <col class="center" />
+    <col class="center" />
+    <col class="center" />
+  </colgroup>
+
+  <thead>
+    <tr>
+      <th scope="col" class="center">education</th>
+      <th scope="col" class="center">label</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td class="center">E0</td>
+      <td class="center">All Education Categories</td>
+    </tr>
+    <tr>
+      <td class="center">E1</td>
+      <td class="center">Less than high school</td>
+    </tr>
+    <tr>
+      <td class="center">E2</td>
+      <td class="center">High school or equivalent, no college</td>
+    </tr>
+    <tr>
+      <td class="center">E3</td>
+      <td class="center">Some college or Associate degree</td>
+    </tr>
+    <tr>
+      <td class="center">E4</td>
+      <td class="center">Bachelor’s degree or advanced degree</td>
+    </tr>
+    <tr>
+      <td class="center">E5</td>
+      <td class="center">Educational attainment not available (workers aged 24 or younger)</td>
+    </tr>
+  </tbody>
+</table>
+
+### ethnicity<a id="sec-4-3" name="sec-4-3"></a>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+  <colgroup>
+    <col class="center" />
+    <col class="center" />
+    <col class="center" />
+  </colgroup>
+
+  <thead>
+    <tr>
+      <th scope="col" class="center">education</th>
+      <th scope="col" class="center">label</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td class="center">A0</td>
+      <td class="center">All Ethnicities</td>
+    </tr>
+    <tr>
+      <td class="center">A1</td>
+      <td class="center">Not Hispanic or Latino</td>
+    </tr>
+    <tr>
+      <td class="center">A2</td>
+      <td class="center">Hispanic or Latino</td>
+    </tr>
+  </tbody>
+</table>
+
+
+### race<a id="sec-4-4" name="sec-4-4"></a>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+  <colgroup>
+    <col class="center" />
+    <col class="center" />
+    <col class="center" />
+  </colgroup>
+
+  <thead>
+    <tr>
+      <th scope="col" class="center">race</th>
+      <th scope="col" class="center">label</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td class="center">A0</td>
+      <td class="center">All Races</td>
+    </tr>
+    <tr>
+      <td class="center">A1</td>
+      <td class="center">White Alone</td>
+    </tr>
+    <tr>
+      <td class="center">A2</td>
+      <td class="center">Black or African American Alone</td>
+    </tr>
+    <tr>
+      <td class="center">A3</td>
+      <td class="center">American Indian or Alaska Native Alone</td>
+    </tr>
+    <tr>
+      <td class="center">A4</td>
+      <td class="center">Asian Alone</td>
+    </tr>
+    <tr>
+      <td class="center">A5</td>
+      <td class="center">Native Hawaiian or Other Pacific Islander Alone</td>
+    </tr>
+    <tr>
+      <td class="center">A6</td>
+      <td class="center">Some Other Race Alone (Not Used)</td>
+    </tr>
+    <tr>
+      <td class="center">A6</td>
+      <td class="center">Two or More Race Groups</td>
+    </tr>
+  </tbody>
+</table>
+
+
+### firmage<a id="sec-4-5" name="sec-4-5"></a>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+  <colgroup>
+    <col class="center" />
+    <col class="center" />
+    <col class="center" />
+  </colgroup>
+
+  <thead>
+    <tr>
+      <th scope="col" class="center">firmage</th>
+      <th scope="col" class="center">label</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td class="center">0</td>
+      <td class="center">All Firm Ages</td>
+    </tr>
+    <tr>
+      <td class="center">A1</td>
+      <td class="center">0-1 Years</td>
+    </tr>
+    <tr>
+      <td class="center">2</td>
+      <td class="center">2-3 Years</td>
+    </tr>
+    <tr>
+      <td class="center">3</td>
+      <td class="center">4-5 Years</td>
+    </tr>
+    <tr>
+      <td class="center">4</td>
+      <td class="center">6-10 Years</td>
+    </tr>
+    <tr>
+      <td class="center">5</td>
+      <td class="center">11+ Years</td>
+    </tr>
+  </tbody>
+</table>
+
+### firmsize<a id="sec-4-6" name="sec-4-6"></a>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+  <colgroup>
+    <col class="left" />
+    <col class="left" />
+    <col class="left" />
+  </colgroup>
+
+  <thead>
+    <tr>
+      <th scope="col" class="center">firmsize</th>
+      <th scope="col" class="left">label</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td class="center">0</td>
+      <td class="left">0-19 Employees</td>
+    </tr>
+    <tr>
+      <td class="center">1</td>
+      <td class="left">20-49 Employees</td>
+    </tr>
+    <tr>
+      <td class="center">2</td>
+      <td class="left">50-249 Employees</td>
+    </tr>
+    <tr>
+      <td class="center">3</td>
+      <td class="left">250-499 Employees</td>
+    </tr>
+    <tr>
+      <td class="center">4</td>
+      <td class="left">500+ Employees</td>
+    </tr>
+  </tbody>
+</table>
+
 
 ### Industry Codes
 
@@ -602,8 +590,10 @@ At this geographic level, with the firm categories, the Census Bureau only provi
 
 ### Geography Codes
 
+At least one 'geography' code is required in the dynamic route. Many can be specified.
+
 From [LEHD Public Use Data Schema V4.0.5](http://lehd.ces.census.gov/data/schema/latest/lehd_public_use_schema.html#geo_level)
-The 'geography' portion of the route is required. At least one 'geography' code is required.
+
 > Metropolitan codes are constructed from the 2-digit state FIPS code 
 > and the 5-digit [CBSA](http://www.census.gov/population/metro/) code provided by the 
 > Census Bureau’s Geography Division.
@@ -613,9 +603,8 @@ The 'geography' portion of the route is required. At least one 'geography' code 
 In otherwords, to specify a metropolitan area in a request, 
 *clients must prepend the state's 2-digit FIPS code to the metro area's 5-digit CBSA code.*
 Thus, geographies are 7-digits in length. Note: you can query for state level data as well
-by zero-padding the 2-digit FIPS code for the state, however, keep in mind that the state-level
-data served by this API is what is contained in the metro-level CSV files provided by the Census Bureau
-and therefore does not have the level of industry detail available in the state-level files.
+by zero-padding the 2-digit FIPS code for the state, however, the state-level
+data served by this API is limited to what the metro-level data files from the Census Bureau contain.
 
 The Census Bureau provides a composite file containing all geocodes: 
 [label_geography_all.csv](http://lehd.ces.census.gov/data/schema/latest/label_geography_all.csv)
@@ -624,7 +613,7 @@ The Census Bureau provides a composite file containing all geocodes:
 # Indicators
 
 The following table, taken from the 
-[LEHD Public Use Data Schema V4.0.5](http://lehd.ces.census.gov/data/schema/latest/lehd_public_use_schema.html#geo_level), lists the indicator variables available in the data set. 
+[LEHD Public Use Data Schema V4.0.5](http://lehd.ces.census.gov/data/schema/latest/lehd_public_use_schema.html#_a_id_indicators_a_indicators), lists the indicator variables available in the data set. 
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -774,14 +763,17 @@ The following table, taken from the
 </table>
 
 *Requested indicators must appear in the query parameters of a request, NOT in the dynamic URI.*
-The URI must contain only the aggregation categories, 'industry', 'geography', 'year', and 'quarter'.
-Requested indicators are specified using the (possibly repeated) 'field' query parameter.
+The URI dynamic path segments must contain only the aggregation categories, 
+'industry', 'geography', 'year', and 'quarter'.
+Requested indicators are specified using the (possibly repeated) 'fields' query parameter.
 For example, to request 'TurnOvrS' and 'Payroll', the query portion of the request would contain
 `?fields=TurnOvrs&fields=Payroll`.
 
 A more detailed explanation of the query parameter syntax follows in the [API Syntax]() section,
 and examples can be found in the [Examples]() section.
 
+Note that the status flag for each indicator is also available. Status flag names are simply 
+the indicator name prepended with an 's'.
 
 # Additional Query Parameters<a id="sec-6" name="sec-6"></a>
 
@@ -791,29 +783,31 @@ structure of the response object.
 
 ## Flat Responses
 
+If the hierarchical structure of the response object is not desired,
+data may be returned as an array of rows by passing the query parameter `flat=true`.
+
+## Flat Leaves
+
 By default, the leafs of the hierarchical response object will be arrays.
 This may not be the desired functionality, so 
 it is possible to request flat leaves with the `flatLeaves=true` query parameter.
 Note that if the length of the leaf arrays does not equal 1,
-specifying 'flatLeaves' will result in an error,
-and so it is necessary to include 'year' and 'quarter' in the dynamic route
+specifying 'flatLeaves' will result in an error.
+Specifically, to request flat leaves, 
+it is necessary to include 'year' and 'quarter' in the dynamic route
 because if they are not part of the response object's nesting structure,
 the leaf arrays will contain elements for each economic quarter.
-
-If the hierarchical structure of the response object is not desired,
-data may be returned as an array of rows by passing the query parameter `flat=true`.
 
 ## Dense Responses
 
 By default, the leaves of the response object will contain fields for each
-segment of the dynamic route, meaning that information is repeated. For example,
-if the route contains '/industry/race/year/quarter', each of those categories
-will appear as a key in the response object's leaves with respective variable value.
+segment of the dynamic route. This means that information is repeated. 
+For example, if the route contains `/industry/race/year/quarter`, each of those categories
+will appear as a key in the response object's leaves with the respective variable's value,
+and therefore this information will also be contained in the keys of each layer of 
 If the client has not specified 'flat=true' in the query parameters,
-this information will also be contained in the keys of each layer of 
-the response's hierarchical structure.
-To reduce remove this redundancy, clients may specify 'dense=true' 
-and thereby remove from the leaves all information contained in the response's
+to remove this redundancy clients may specify 'dense=true' 
+This will remove from the leaves all information contained in the response's
 heirarchial structure.
 
 Examples can be found in the [Examples]() section.
