@@ -13,6 +13,13 @@ _NOTE: This documentation page is a work in progress._
     - [race](#sec-4-4)
     - [firmage](#sec-4-5)
     - [firmsize](#sec-4-6)
+    - [industry](#sec-4-7)
+    - [geography](#sec-4-8)
+- [Indicators](#sec-5)
+- [Additional Query Parameters](#sec-6)
+    - [flat responses](#sec-6-1)
+    - [flat leaves](#sec-6-2)
+    - [dense](#sec-6-3)
 
 
 # Introduction<a id="sec-1" name="sec-1"></a>
@@ -581,14 +588,14 @@ message will be sent to the client.
 </table>
 
 
-### Industry Codes
+### industry<a id="sec-4-7" name="sec-4-7"></a>
 
 Currently, this API contains only the Metropolitan level data from level data from the QWI dataset.
 At this geographic level, with the firm categories, the Census Bureau only provides 
 'industry' breakdowns at the 2-digit NAICS Sectors detail level.
 (4-digit breakdowns are available without firm characteristics.)
 
-### Geography Codes
+### geography<a id="sec-4-8" name="sec-4-8"></a>
 
 At least one 'geography' code is required in the dynamic route. Many can be specified.
 
@@ -610,7 +617,7 @@ The Census Bureau provides a composite file containing all geocodes:
 [label_geography_all.csv](http://lehd.ces.census.gov/data/schema/latest/label_geography_all.csv)
 
 
-# Indicators
+# Indicators<a id="sec-5" name="sec-5"></a>
 
 The following table, taken from the 
 [LEHD Public Use Data Schema V4.0.5](http://lehd.ces.census.gov/data/schema/latest/lehd_public_use_schema.html#_a_id_indicators_a_indicators), lists the indicator variables available in the data set. 
@@ -781,12 +788,12 @@ In addition to the 'fields' parameter explained in the previous section,
 other parameters are provided that allow the user to alter the 
 structure of the response object.
 
-## Flat Responses
+## Flat Responses<a id="sec-6-1" name="sec-6-1"></a>
 
 If the hierarchical structure of the response object is not desired,
 data may be returned as an array of rows by passing the query parameter `flat=true`.
 
-## Flat Leaves
+## Flat Leaves<a id="sec-6-2" name="sec-6-2"></a>
 
 By default, the leafs of the hierarchical response object will be arrays.
 This may not be the desired functionality, so 
@@ -798,7 +805,7 @@ it is necessary to include 'year' and 'quarter' in the dynamic route
 because if they are not part of the response object's nesting structure,
 the leaf arrays will contain elements for each economic quarter.
 
-## Dense Responses
+## Dense Responses<a id="sec-6-3" name="sec-6-3"></a>
 
 By default, the leaves of the response object will contain fields for each
 segment of the dynamic route. This means that information is repeated. 
