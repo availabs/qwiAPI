@@ -845,7 +845,8 @@ All data queries begin with the route segment `/data/`.
 
   <thead>
     <tr>
-      <th scope="col" class="left">Query Breakdown</th>
+      <th scope="col" class="left">Category</th>
+      <th scope="col" class="left">Requested</th>
     </tr>
   </thead>
 
@@ -873,6 +874,10 @@ All data queries begin with the route segment `/data/`.
     <tr>
       <td class="left">Indicator</td>
       <td class="left">Total Quarterly Payroll</td>
+    </tr>
+    <tr>
+      <td class="left">Response Structure</td>
+      <td class="left">dense, flatLeaves</td>
     </tr>
   </tbody>
 
@@ -934,7 +939,7 @@ Response:
 
 
 ### Example 2
-`<host server address>/data/year20082009//quarter/educationE2E4/geography24125803229820?fields=EarnSepS&fields=EarnHirAS&fields=FrmJbCS&dense=true`
+`<host server address>/data/year200820142014//quarter/educationE2E4/geography1845460?fields=EarnSepS&fields=EarnHirAS&fields=FrmJbCS&dense=true&flatLeaves=true`
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -945,14 +950,15 @@ Response:
 
   <thead>
     <tr>
-      <th scope="col" class="left">Query Breakdown</th>
+      <th scope="col" class="left">Category</th>
+      <th scope="col" class="left">Requested</th>
     </tr>
   </thead>
 
   <tbody>
     <tr>
       <td class="left">Years</td>
-      <td class="left">2008 & 2009</td>
+      <td class="left">2008, 2014</td>
     </tr>
     <tr>
       <td class="left">Quarters</td>
@@ -968,296 +974,285 @@ Response:
     </tr>
     <tr>
       <td class="left">Geographic Areas</td>
-      <td class="left">Baltimore-Columbia-Towson, MD, and Las Vegas-Henderson-Paradise, NV</td>
+      <td class="left">Terre Haute, IN</td>
     </tr>
     <tr>
       <td class="left">Indicators</td>
       <td class="left">Hires All (Stable): Average Monthly Earnings, Separations (Stable): Average Monthly Earnings, Job Change (Stable): Net Change</td>
     </tr>
+    <tr>
+      <td class="left">Response Structure</td>
+      <td class="left">dense, flatLeaves</td>
+    </tr>
   </tbody>
-
 </table>
+
 
 Response:
 ```JSON
 {
   "data": {
-    "2008": {
-      "1": {
-        "E4": {
-          "2412580": [
-            {
-              "earnseps": "4573",
-              "earnhiras": "4155",
-              "frmjbcs": "1297"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "4258",
-              "earnhiras": "4112",
-              "frmjbcs": "852"
-            }
-          ]
+    "1845460": {
+      "2008": {
+        "1": {
+          "E2": {
+            "earnseps": "2168",
+            "earnhiras": "2096",
+            "frmjbcs": "10"
+          },
+          "E4": {
+            "earnseps": "3414",
+            "earnhiras": "4250",
+            "frmjbcs": "151"
+          }
         },
-        "E2": {
-          "2412580": [
-            {
-              "earnseps": "2279",
-              "earnhiras": "2243",
-              "frmjbcs": "381"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "2521",
-              "earnhiras": "2567",
-              "frmjbcs": "950"
-            }
-          ]
+        "2": {
+          "E4": {
+            "earnseps": "2984",
+            "earnhiras": "2978",
+            "frmjbcs": "-126"
+          },
+          "E2": {
+            "earnseps": "2042",
+            "earnhiras": "1985",
+            "frmjbcs": "-281"
+          }
+        },
+        "3": {
+          "E2": {
+            "earnseps": "2181",
+            "earnhiras": "2184",
+            "frmjbcs": "380"
+          },
+          "E4": {
+            "earnseps": "3701",
+            "earnhiras": "3513",
+            "frmjbcs": "244"
+          }
+        },
+        "4": {
+          "E4": {
+            "earnseps": "3090",
+            "earnhiras": "3236",
+            "frmjbcs": "59"
+          },
+          "E2": {
+            "earnseps": "2020",
+            "earnhiras": "1969",
+            "frmjbcs": "-55"
+          }
         }
       },
-      "2": {
-        "E4": {
-          "2412580": [
-            {
-              "earnseps": "4482",
-              "earnhiras": "4798",
-              "frmjbcs": "-1473"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "4080",
-              "earnhiras": "4167",
-              "frmjbcs": "-304"
-            }
-          ]
+      "2014": {
+        "1": {
+          "E2": {
+            "earnseps": "2063",
+            "earnhiras": "1898",
+            "frmjbcs": "-72"
+          },
+          "E4": {
+            "earnseps": "3057",
+            "earnhiras": "2513",
+            "frmjbcs": "2"
+          }
         },
-        "E2": {
-          "2412580": [
-            {
-              "earnseps": "2400",
-              "earnhiras": "2519",
-              "frmjbcs": "-2935"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "2664",
-              "earnhiras": "2751",
-              "frmjbcs": "-843"
-            }
-          ]
-        }
-      },
-      "3": {
-        "E4": {
-          "2412580": [
-            {
-              "earnseps": "4826",
-              "earnhiras": "4599",
-              "frmjbcs": "-1021"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "4141",
-              "earnhiras": "3962",
-              "frmjbcs": "-985"
-            }
-          ]
+        "2": {
+          "E4": {
+            "earnseps": "3004",
+            "earnhiras": "3293",
+            "frmjbcs": "-106"
+          },
+          "E2": {
+            "earnseps": "2094",
+            "earnhiras": "2359",
+            "frmjbcs": "-251"
+          }
         },
-        "E2": {
-          "2412580": [
-            {
-              "earnseps": "2451",
-              "earnhiras": "2419",
-              "frmjbcs": "-456"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "2711",
-              "earnhiras": "2671",
-              "frmjbcs": "-1759"
-            }
-          ]
-        }
-      },
-      "4": {
-        "E2": {
-          "2412580": [
-            {
-              "earnseps": "2551",
-              "earnhiras": "2545",
-              "frmjbcs": "-3707"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "2810",
-              "earnhiras": "2686",
-              "frmjbcs": "-3902"
-            }
-          ]
+        "3": {
+          "E2": {
+            "earnseps": "2278",
+            "earnhiras": "2321",
+            "frmjbcs": "59"
+          },
+          "E4": {
+            "earnseps": "3392",
+            "earnhiras": "2878",
+            "frmjbcs": "-10"
+          }
         },
-        "E4": {
-          "2412580": [
-            {
-              "earnseps": "5655",
-              "earnhiras": "4844",
-              "frmjbcs": "-2389"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "4412",
-              "earnhiras": "4132",
-              "frmjbcs": "-3477"
-            }
-          ]
-        }
-      }
-    },
-    "2009": {
-      "1": {
-        "E4": {
-          "2412580": [
-            {
-              "earnseps": "4701",
-              "earnhiras": "4187",
-              "frmjbcs": "311"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "4109",
-              "earnhiras": "3635",
-              "frmjbcs": "-2248"
-            }
-          ]
-        },
-        "E2": {
-          "2412580": [
-            {
-              "earnseps": "2313",
-              "earnhiras": "2252",
-              "frmjbcs": "-1076"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "2614",
-              "earnhiras": "2357",
-              "frmjbcs": "-2935"
-            }
-          ]
-        }
-      },
-      "2": {
-        "E2": {
-          "2412580": [
-            {
-              "earnseps": "2449",
-              "earnhiras": "2594",
-              "frmjbcs": "-6133"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "2623",
-              "earnhiras": "2585",
-              "frmjbcs": "-5162"
-            }
-          ]
-        },
-        "E4": {
-          "2412580": [
-            {
-              "earnseps": "4563",
-              "earnhiras": "4812",
-              "frmjbcs": "-3406"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "3847",
-              "earnhiras": "4128",
-              "frmjbcs": "-3144"
-            }
-          ]
-        }
-      },
-      "3": {
-        "E4": {
-          "2412580": [
-            {
-              "earnseps": "4904",
-              "earnhiras": "4614",
-              "frmjbcs": "-1222"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "4100",
-              "earnhiras": "3653",
-              "frmjbcs": "-1974"
-            }
-          ]
-        },
-        "E2": {
-          "2412580": [
-            {
-              "earnseps": "2496",
-              "earnhiras": "2415",
-              "frmjbcs": "-726"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "2788",
-              "earnhiras": "2375",
-              "frmjbcs": "-2531"
-            }
-          ]
-        }
-      },
-      "4": {
-        "E2": {
-          "2412580": [
-            {
-              "earnseps": "2664",
-              "earnhiras": "2694",
-              "frmjbcs": "-2276"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "2746",
-              "earnhiras": "2549",
-              "frmjbcs": "-3873"
-            }
-          ]
-        },
-        "E4": {
-          "2412580": [
-            {
-              "earnseps": "5994",
-              "earnhiras": "4851",
-              "frmjbcs": "-2426"
-            }
-          ],
-          "3229820": [
-            {
-              "earnseps": "4565",
-              "earnhiras": "3970",
-              "frmjbcs": "-3209"
-            }
-          ]
+        "4": {
+          "E2": {
+            "earnseps": "2352",
+            "earnhiras": "2358",
+            "frmjbcs": "-202"
+          },
+          "E4": {
+            "earnseps": "3283",
+            "earnhiras": "3022",
+            "frmjbcs": "-52"
+          }
         }
       }
     }
   }
 }
 ```
+
+
+
+
+### Example 3
+`<host server address>/data/year20102015/industry00054/geography0641940/educationE4/sex?fields=HirNS&fields=EarnHirNS&flat=true`
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+  <colgroup>
+    <col class="left" />
+    <col class="left" />
+  </colgroup>
+
+  <thead>
+    <tr>
+      <th scope="col" class="left">Category</th>
+      <th scope="col" class="left">Requested</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td class="left">Years</td>
+      <td class="left">2010 to 2015</td>
+    </tr>
+    <tr>
+      <td class="left">NAICS Sector</td>
+      <td class="left">Professional, Scientific, and Technical Services</td>
+    </tr>
+    <tr>
+      <td class="left">Geographic Areas</td>
+      <td class="left"> San Jose-Sunnyvale-Santa Clara, CA (Silicon Valley)</td>
+    </tr>
+    <tr>
+      <td class="left">Education Level</td>
+      <td class="left">'Bachelor’s degree or advanced degree'</td>
+    </tr>
+    <tr>
+      <td class="left">Indicators</td>
+      <td class="left">Hires New (Stable): Counts, Hires New (Stable): Average Monthly Earnings</td>
+    </tr>
+    <tr>
+      <td class="left">Response Structure</td>
+      <td class="left">flat</td>
+    </tr>
+  </tbody>
+</table>
+
+
+Response:
+```JSON
+{
+  "data": [
+    {
+      "year": "2014",
+      "industry": "54 ",
+      "geography": "0641940 ",
+      "education": "E4",
+      "sex": "1",
+      "hirns": "2704",
+      "earnhirns": "11276",
+      "quarter": "1"
+    },
+    {
+      "year": "2014",
+      "industry": "54 ",
+      "geography": "0641940 ",
+      "education": "E4",
+      "sex": "2",
+      "hirns": "1390",
+      "earnhirns": "8071",
+      "quarter": "1"
+    },
+    {
+      "year": "2014",
+      "industry": "54 ",
+      "geography": "0641940 ",
+      "education": "E4",
+      "sex": "1",
+      "hirns": "2748",
+      "earnhirns": "11542",
+      "quarter": "2"
+    },
+    {
+      "year": "2014",
+      "industry": "54 ",
+      "geography": "0641940 ",
+      "education": "E4",
+      "sex": "2",
+      "hirns": "1533",
+      "earnhirns": "8392",
+      "quarter": "2"
+    },
+    {
+      "year": "2014",
+      "industry": "54 ",
+      "geography": "0641940 ",
+      "education": "E4",
+      "sex": "2",
+      "hirns": "1625",
+      "earnhirns": "8609",
+      "quarter": "3"
+    },
+    {
+      "year": "2014",
+      "industry": "54 ",
+      "geography": "0641940 ",
+      "education": "E4",
+      "sex": "1",
+      "hirns": "3044",
+      "earnhirns": "11519",
+      "quarter": "3"
+    },
+    {
+      "year": "2014",
+      "industry": "54 ",
+      "geography": "0641940 ",
+      "education": "E4",
+      "sex": "1",
+      "hirns": "2927",
+      "earnhirns": "12317",
+      "quarter": "4"
+    },
+    {
+      "year": "2014",
+      "industry": "54 ",
+      "geography": "0641940 ",
+      "education": "E4",
+      "sex": "2",
+      "hirns": "1662",
+      "earnhirns": "9474",
+      "quarter": "4"
+    },
+    {
+      "year": "2015",
+      "industry": "54 ",
+      "geography": "0641940 ",
+      "education": "E4",
+      "sex": "1",
+      "hirns": "2782",
+      "earnhirns": "11884",
+      "quarter": "1"
+    },
+    {
+      "year": "2015",
+      "industry": "54 ",
+      "geography": "0641940 ",
+      "education": "E4",
+      "sex": "2",
+      "hirns": "1552",
+      "earnhirns": "8816",
+      "quarter": "1"
+    }
+  ]
+}
+```
+
+
