@@ -34,6 +34,7 @@
           href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" 
           integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" 
           crossorigin="anonymous">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
 
     <link rel="stylesheet" href="/styles/docs.css">
     <link rel="stylesheet" href="/styles/nvd3.css">
@@ -92,35 +93,45 @@
        </div>
     </div>
 
+    <div class="container bs-docs-container">
+      <div class="row">
+        <div class="col-md-9" role="main">
+          <div class="bs-docs-section">
 <!--__GENERATED_DOCUMENTATION_INSERTED_HERE___-->
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <!-- Footer
-       ================================================== -->
+
+  <!-- Footer
+     ================================================== -->
     <footer class="bs-docs-footer" role="contentinfo">
     </footer>
     <!-- Bootstrap core JavaScript
        ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
 
-    <script   src="https://code.jquery.com/jquery-3.0.0.min.js"   
-              integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0="   
-              crossorigin="anonymous">
-    </script>
+    <script   src="https://code.jquery.com/jquery-2.2.4.min.js"   
+              integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   
+              crossorigin="anonymous"></script>
 
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" 
             integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" 
             crossorigin="anonymous">
     </script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/js/umd/scrollspy.js"></script>
     <script >
       $(function(){
 
       $('body').scrollspy({target:".bs-docs-sidebar"});
 
+console.log($('.bs-docs-sidebar'))
       $('.bs-docs-sidebar').affix({
         offset: {
           top: 420,
+          right: 100,
           bottom: function () {
             return (this.bottom = $('.footer').outerHeight(true))
           }

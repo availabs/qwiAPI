@@ -34,6 +34,7 @@
           href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" 
           integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" 
           crossorigin="anonymous">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
 
     <link rel="stylesheet" href="/styles/docs.css">
     <link rel="stylesheet" href="/styles/nvd3.css">
@@ -92,1345 +93,1360 @@
        </div>
     </div>
 
-<ul>
-<li><a href="#sec-1">Introduction</a></li>
-<li><a href="#sec-2">QWI Dataset Overview</a></li>
-<li><a href="#sec-3">Additional Route Segments</a>
-
-<ul>
-<li><a href="#sec-3-1">Specifying the Response Structure</a></li>
-<li><a href="#sec-3-2">Supported Category Combinations</a>
-
-<ul>
-<li><a href="#sec-3-2-1">Supported Demographic and Establishment Category Interactions</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#sec-4">Category Codes</a>
-
-<ul>
-<li><a href="#sec-4-1">agegrp</a></li>
-<li><a href="#sec-4-2">education</a></li>
-<li><a href="#sec-4-3">ethnicity</a></li>
-<li><a href="#sec-4-4">race</a></li>
-<li><a href="#sec-4-5">firmage</a></li>
-<li><a href="#sec-4-6">firmsize</a></li>
-<li><a href="#sec-4-7">industry</a></li>
-<li><a href="#sec-4-8">geography</a></li>
-</ul>
-</li>
-<li><a href="#sec-5">Indicators</a></li>
-<li><a href="#sec-6">Additional Query Parameters</a>
-
-<ul>
-<li><a href="#sec-6-1">flat responses</a></li>
-<li><a href="#sec-6-2">flat leaves</a></li>
-<li><a href="#sec-6-3">dense</a></li>
-</ul>
-</li>
-<li><a href="#sec-7">Syntax and Examples</a></li>
-<li><a href="#sec-8">Deployment</a></li>
-</ul>
-
-
-<h1>TL;DR</h1>
-
-<p><a href="#sec-7">Syntax and Examples</a></p>
-
-<h1>Introduction<a id="sec-1" name="sec-1"></a></h1>
-
-<p>This project was created under a grant from the <a href="http://www.kauffman.org/">Ewing Marion Kauffman Foundation</a>.</p>
-
-<p>This repository contains code for an JSON API to
-the U.S. Census Bureau&#39;s Quarterly Workforce Indicators
-(<a href="http://lehd.ces.census.gov/data/">QWI</a>) dataset.
-This application focuses on the Metropolitian level data from the QWI
-due to the fact that the county level data takes over 2T of disk space.</p>
-
-<p>This project is composed entirely of JavaScript code and SQL scripts
-that download the CSV files hosted on the Census Bureau&#39;s website
-and uploads them to a Postgres database.
-The only dependencies are a Postgres database and an Node environment,
-and administrators need only run a couple of scripts to fire up an instance of this API.</p>
-
-<p>Table and column names map one-to-one with names from the Census data and documentation.
-Users familiar with the QWI dataset should find the JSON API easy to learn, intuitive, and powerful.
-For users not yet aquainted with the dataset, informative error messages should make learning
-how to leverage this tool relatively easy.</p>
-
-<p>A Node/Express application server connects to the Postgres database and serves the content.
-The performance of Node, together with clustered indices build on the database tables,
-provide users with sub-second response times.
-This API server can power interactive data exploration tools.</p>
-
-<h1>QWI Dataset Overview<a id="sec-2" name="sec-2"></a></h1>
-
-<p>From the <a href="http://lehd.ces.census.gov/doc/QWI_101.pdf">Quarterly Workforce Indicators 101</a> document:</p>
-
-<blockquote><p>The Quarterly Workforce Indicators (QWI) provide local labor market statistics by industry, worker
-demographics, employer age and size. Unlike statistics tabulated from firm or person-level data, the QWI
-source data are unique job-level data that link workers to their employers. Because of this link, labor market
-data in the QWI is available by worker age, sex, educational attainment, and race/ethnicity. This allows for
-analysis by demographics of a particular local labor market or industry &mdash; for instance, identifying industries with
-aging workforces. Links between workers and firms also allow the QWI to identify worker flows &mdash; hires,
-separations, and turnover&mdash;as well as net employment growth. As most hiring activity is the consequence of
-worker turnover rather than employment growth, a focus on employment growth alone may misrepresent
-employment opportunity in the local labor market. Wages by industry and demographics as well as by whether
-the worker was newly hired are also available. QWI wages for new hires can be compared to wages for
-continuing workers, and wage growth for similar workers across industries can be compared to identify
-important local labor market trends.
-The source data for the QWI is the Longitudinal Employer-Household Dynamics (LEHD) linked employeremployee
-microdata. The LEHD data is massive longitudinal database covering over 95% of U.S. private sector
-jobs. Much of this data is collected via a unique federal&mdash;state data sharing collaboration, the Local Employment
-Dynamics (LED) partnership. LED is a cooperative venture between the LEHD program at the U.S. Census
-Bureau and state agencies of all 50 states, the District of Columbia, Puerto Rico, and the U.S. Virgin Islands2.</p>
-
-<p>Partner states voluntarily submit quarterly data files from existing administrative record systems, which are
-combined with a range of other data sources to generate public use products, including QWI and LODES (LEHD
-Origin-Destination Employment Statistics, presented in OnTheMap) and other new products in development. By
-integrating data used to administer public programs with existing census and surveys, a new national jobs
-database is generated at very low cost and with no additional respondent burden.</p></blockquote>
-
-<p>The data from the U.S. Census Bureau is available tabulated to
-national, state, metropolitan/micropolitan areas, county, and Workforce Investment Board (WIB) areas,
-however <em>this API only serves data found in the metropolitian-level CSVs</em>.</p>
-
-<h1>Dynamic Routes<a id="sec-3" name="sec-3"></a></h1>
-
-<h2>Specifying the Response Structure<a id="sec-3-1" name="sec-3-1"></a></h2>
-
-<p>The <pre class="code">qwiAPI</pre> features <em>Dynamic Routes</em> that allow clients to query the dataset
-based on worker demographics, employer characteristics, and/or industry,
-The server response will be in the form of a JSON object
-with a hierarchial structure that parallels the query&#39;s Dynamic Route.
-In other words, <em>users of this API can specify the structure of the response object
-through the stucture of the route they use to request the data</em>.
-This functionality makes for exceptionally clean code in client apps.
-(This behavior can be turned off via the <pre class="code">flat</pre> parameter, as described below.)</p>
-
-<p>For example, if the client wanted a response broken down by industry, then firmage,
-the dynamic route would contain the sequence <pre class="code">/industry/firmage</pre>.
-The response object would contain data nested in that order: each industry would have a object keyed by firmage.
-Conversely, <pre class="code">/firmage/industry</pre> would yield a response where each firmage has an object keyed by industry code.</p>
-
-<p>To specifically request all 0-1 year firms in Construction,
-the request would include the respective QWI firmage code
-and NAICS industry code: <pre class="code">/industry00023/firmage1</pre>.
-Notice that the industry value is zero-padded.</p>
-
-<p>The required code lengths for the route parameters are specified below in the <a href="">API Syntax</a> section.</p>
-
-<h2>Supported query parameters and their lengths<a id="sec-3-2" name="sec-3-2"></a></h2>
-
-<p>Each of the categories listed in the following table
-can appear as a segment in the dynamic route.
-Consequently, they can be used to specify the JSON response structure
-and to filter the information in the response.
-Values specified as filters <em>must be zero-padded</em> if the requested value
-is less than the length specified in the following table.
-(This can occur for geography and industry categories.)</p>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="left" />
-    <col class="left" />
-    <col class="left" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="left">Route Segment</th>
-      <th scope="col" class="left">Length</th>
-      <th scope="col" class="left">Description</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="left">geography</td>
-      <td class="left">7</td>
-      <td class="left">Geography code</td>
-    </tr>
-
-    <tr>
-      <td class="left">industry</td>
-      <td class="left">5</td>
-      <td class="left">Industry code</td>
-    </tr>
-
-    <tr>
-      <td class="left">sex</td>
-      <td class="left">1</td>
-      <td class="left">Gender code</td>
-    </tr>
-
-    <tr>
-      <td class="left">agegrp</td>
-      <td class="left">3</td>
-      <td class="left">Age group code (WIA)</td>
-    </tr>
-
-    <tr>
-      <td class="left">race</td>
-      <td class="left">2</td>
-      <td class="left">Race</td>
-    </tr>
-
-    <tr>
-      <td class="left">ethnicity</td>
-      <td class="left">2</td>
-      <td class="left">Ethnicity</td>
-    </tr>
-
-    <tr>
-      <td class="left">education</td>
-      <td class="left">2</td>
-      <td class="left">Education</td>
-    </tr>
-
-    <tr>
-      <td class="left">firmage</td>
-      <td class="left">1</td>
-      <td class="left">Firm Age group</td>
-    </tr>
-
-    <tr>
-      <td class="left">firmsize</td>
-      <td class="left">1</td>
-      <td class="left">Firm Size group</td>
-    </tr>
-
-    <tr>
-      <td class="left">year</td>
-      <td class="left">4</td>
-      <td class="left">Year</td>
-    </tr>
-
-    <tr>
-      <td class="left">quarter</td>
-      <td class="left">1</td>
-      <td class="left">Quarter</td>
-    </tr>
-  </tbody>
-</table>
-
-
-<p>NOTE: if exactly two years are specified in the "year" segment of the route,
-they will be interpreted as a span. For example the segment <pre class="code">year20012015</pre>
-will return data from the range 2001 to 2015, inclusive. To turn off this behavior,
-specify one of the years twice, as in <pre class="code">year200120152015</pre>.</p>
-
-<p>A more detailed explanation of the routing syntax follows in the <a href="#sec-7">Syntax and Examples</a> section.</p>
-
-<h2>Supported category combinations<a id="sec-2-1" name="sec-3-2-1"></a></h2>
-
-<p>From the <a href="http://lehd.ces.census.gov/doc/QWI_101.pdf">Quarterly Workforce Indicators 101</a> document:</p>
-
-<blockquote><p>The QWI are aggregated from the job level to establishments, and then to a number of higher level categories
-for public release. These categories are interacted in various combinations on the public release files. Within
-the public release files, totals for each category are included along with detailed components.</p>
-
-<p>The demographic categories available on the QWI include age, sex, race, ethnicity, and education. The
-interactions selected for publication include:
-<ul>
-   <li>Sex by Age [sa]</li>
-   <li>Race by Ethnicity [rh]</li>
-   <li>Sex by Education [se]</li>
-</ul></p>
-
-<p>Firm age and size are defined at the national level, rather than the state level.
-A national firm may frequently be larger or older than the part of that firm found in any one state.
-Firm age and size are reported only for private sector firms, and are not interacted with each other.
-<ul>
-  <li>Firm Age [fa]</li>
-  <li>Firm Size [fs]</li>
-</ul></p></blockquote>
-
-<p>The U.S. Census Bureau provides data for each combination of demographic and firm categories interactions,
-but, <em>the listed category interactions within the demographic and firm classes cannot be combined</em>.
-All combinations provided by the Census Bureau are available through this API.
-Category interactions outside of these are not supported and will result in an error message.</p>
-
-<p>The following categories can be used in combination with any others:</p>
-
-<ul>
-  <li>geography</li>
-  <li>industry</li>
-  <li>year</li>
-  <li>quarter</li>
-</ul>
-
-
-<p>In fact, <em>"geography" is required in all requests</em>. (The dataset is too large to return all geographies by default.)</p>
-
-<p>"year" and "quarter" are added automatically to the selected fields.
-Even if they do not appear in a dynamic route,
-they will appear in the response leaves.</p>
-
-<p>For the sake clarity, supported demographic and establishment category interactions shown in the following table.</p>
-
-<h3>Supported Demographic and Establishment Category Interactions</h3>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="center" />
-    <col class="center" />
-    <col class="left" />
-    <col class="left" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="left">Demographic Categories</th>
-      <th scope="col" class="left">Firm Categories</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="left">sex & agegrp</td>
-      <td class="left">firmage</td>
-    </tr>
-
-    <tr>
-      <td class="left">sex & education</td>
-      <td class="left">firmage</td>
-    </tr>
-
-    <tr>
-      <td class="left">race & ethnicity</td>
-      <td class="left">firmage</td>
-    </tr>
-
-    <tr>
-      <td class="left">sex & agegrp</td>
-      <td class="left">firmsize</td>
-    </tr>
-
-    <tr>
-      <td class="left">sex & education</td>
-      <td class="left">firmsize</td>
-    </tr>
-
-    <tr>
-      <td class="left">race & ethnicity</td>
-      <td class="left">firmsize</td>
-    </tr>
-  </tbody>
-</table>
-
-
-<p>For example, API clients can request data for all female employees
-with a bachelor" sub-route:
-  <pre class="code">/sex2/educationE4</pre></p>
-
-<p>However, a query for all 35-44 year old employees
-with a bachelor"s is invalid because
-the combination of employee age group and education level is not supported.
-  <del><pre class="code">/agegrpA05/educationE4</pre></del></p>
-
-<p>A more detailed explanation of the routing syntax follows in the <a href="#sec-7">Syntax and Examples</a> section.</p>
-
-<h1>Category Codes<a id="sec-4" name="sec-4"></a></h1>
-
-<p>For reference, the "Categorical Variables" section of the
-<a href="http://lehd.ces.census.gov/doc/QWI_101.pdf">Quarterly Workforce Indicators 101</a>
-document is included below.
-The left-hand column in each of the above tables
-shows values that can be used to filter the response&#39;s information.
-Note that the above tables contain all the values in the domain of each category.
-If filter values outside of a category&#39;s domain are specified, an error
-message will be sent to the client.</p>
-
-<p>NOTE: By default, the code representing the aggregate value for each category is selected.</p>
-
-<h3>agegrp<a id="sec-4-1" name="sec-4-1"></a></h3>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="center" />
-    <col class="center" />
-    <col class="center" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="center">agegrp</th>
-      <th scope="col" class="center">label</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="center">A00</td>
-      <td class="center">All Ages (14-99)</td>
-    </tr>
-
-    <tr>
-      <td class="center">A01</td>
-      <td class="center">14-18</td>
-    </tr>
-    <tr>
-      <td class="center">A02</td>
-      <td class="center">19-21</td>
-    </tr>
-    <tr>
-      <td class="center">A03</td>
-      <td class="center">22-24</td>
-    </tr>
-    <tr>
-      <td class="center">A04</td>
-      <td class="center">25-34</td>
-    </tr>
-    <tr>
-      <td class="center">A05</td>
-      <td class="center">35-44</td>
-    </tr>
-    <tr>
-      <td class="center">A06</td>
-      <td class="center">45-54</td>
-    </tr>
-    <tr>
-      <td class="center">A07</td>
-      <td class="center">55-64</td>
-    </tr>
-    <tr>
-      <td class="center">A08</td>
-      <td class="center">65-99</td>
-    </tr>
-  </tbody>
-</table>
-
-
-<h3>education<a id="sec-4-2" name="sec-4-2"></a></h3>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="center" />
-    <col class="center" />
-    <col class="center" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="center">education</th>
-      <th scope="col" class="center">label</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="center">E0</td>
-      <td class="center">All Education Categories</td>
-    </tr>
-    <tr>
-      <td class="center">E1</td>
-      <td class="center">Less than high school</td>
-    </tr>
-    <tr>
-      <td class="center">E2</td>
-      <td class="center">High school or equivalent, no college</td>
-    </tr>
-    <tr>
-      <td class="center">E3</td>
-      <td class="center">Some college or Associate degree</td>
-    </tr>
-    <tr>
-      <td class="center">E4</td>
-      <td class="center">Bachelor&#39;s degree or advanced degree</td>
-    </tr>
-    <tr>
-      <td class="center">E5</td>
-      <td class="center">Educational attainment not available (workers aged 24 or younger)</td>
-    </tr>
-  </tbody>
-</table>
-
-
-<h3>ethnicity<a id="sec-4-3" name="sec-4-3"></a></h3>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="center" />
-    <col class="center" />
-    <col class="center" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="center">education</th>
-      <th scope="col" class="center">label</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="center">A0</td>
-      <td class="center">All Ethnicities</td>
-    </tr>
-    <tr>
-      <td class="center">A1</td>
-      <td class="center">Not Hispanic or Latino</td>
-    </tr>
-    <tr>
-      <td class="center">A2</td>
-      <td class="center">Hispanic or Latino</td>
-    </tr>
-  </tbody>
-</table>
-
-
-<h3>race<a id="sec-4-4" name="sec-4-4"></a></h3>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="center" />
-    <col class="center" />
-    <col class="center" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="center">race</th>
-      <th scope="col" class="center">label</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="center">A0</td>
-      <td class="center">All Races</td>
-    </tr>
-    <tr>
-      <td class="center">A1</td>
-      <td class="center">White Alone</td>
-    </tr>
-    <tr>
-      <td class="center">A2</td>
-      <td class="center">Black or African American Alone</td>
-    </tr>
-    <tr>
-      <td class="center">A3</td>
-      <td class="center">American Indian or Alaska Native Alone</td>
-    </tr>
-    <tr>
-      <td class="center">A4</td>
-      <td class="center">Asian Alone</td>
-    </tr>
-    <tr>
-      <td class="center">A5</td>
-      <td class="center">Native Hawaiian or Other Pacific Islander Alone</td>
-    </tr>
-    <tr>
-      <td class="center">A6</td>
-      <td class="center">Some Other Race Alone (Not Used)</td>
-    </tr>
-    <tr>
-      <td class="center">A6</td>
-      <td class="center">Two or More Race Groups</td>
-    </tr>
-  </tbody>
-</table>
-
-
-<h3>firmage<a id="sec-4-5" name="sec-4-5"></a></h3>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="center" />
-    <col class="center" />
-    <col class="center" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="center">firmage</th>
-      <th scope="col" class="center">label</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="center">0</td>
-      <td class="center">All Firm Ages</td>
-    </tr>
-    <tr>
-      <td class="center">A1</td>
-      <td class="center">0-1 Years</td>
-    </tr>
-    <tr>
-      <td class="center">2</td>
-      <td class="center">2-3 Years</td>
-    </tr>
-    <tr>
-      <td class="center">3</td>
-      <td class="center">4-5 Years</td>
-    </tr>
-    <tr>
-      <td class="center">4</td>
-      <td class="center">6-10 Years</td>
-    </tr>
-    <tr>
-      <td class="center">5</td>
-      <td class="center">11+ Years</td>
-    </tr>
-  </tbody>
-</table>
-
-
-<h3>firmsize<a id="sec-4-6" name="sec-4-6"></a></h3>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="left" />
-    <col class="left" />
-    <col class="left" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="center">firmsize</th>
-      <th scope="col" class="left">label</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="center">0</td>
-      <td class="left">0-19 Employees</td>
-    </tr>
-    <tr>
-      <td class="center">1</td>
-      <td class="left">20-49 Employees</td>
-    </tr>
-    <tr>
-      <td class="center">2</td>
-      <td class="left">50-249 Employees</td>
-    </tr>
-    <tr>
-      <td class="center">3</td>
-      <td class="left">250-499 Employees</td>
-    </tr>
-    <tr>
-      <td class="center">4</td>
-      <td class="left">500+ Employees</td>
-    </tr>
-  </tbody>
-</table>
-
-
-<h3>industry<a id="sec-4-7" name="sec-4-7"></a></h3>
-
-<p>Currently, this API contains only the Metropolitan level data from level data from the QWI dataset.
-At this geographic level, with the firm categories, the Census Bureau only provides
-"industry" breakdowns at the 2-digit NAICS Sectors detail level.
-(4-digit breakdowns are available without firm characteristics.)</p>
-
-<h3>geography<a id="sec-4-8" name="sec-4-8"></a></h3>
-
-<p>At least one "geography" code is required in the dynamic route. Many can be specified.</p>
-
-<p>From <a href="http://lehd.ces.census.gov/data/schema/latest/lehd_public_use_schema.html#geo_level">LEHD Public Use Data Schema V4.0.5</a></p>
-
-<blockquote><p>Metropolitan codes are constructed from the 2-digit state FIPS code
-and the 5-digit <a href="http://www.census.gov/population/metro/">CBSA</a> code provided by the
-Census Bureau&#39;s Geography Division.</p>
-
-<p>In the QWI, the metropolitan/micropolitan areas are the state parts of the full CBSA areas.</p></blockquote>
-
-<p>In otherwords, to specify a metropolitan area in a request,
-<em>clients must prepend the state&#39;s 2-digit FIPS code to the metro area&#39;s 5-digit CBSA code.</em>
-Thus, geographies are 7-digits in length. Note: you can query for state level data as well
-by zero-padding the 2-digit FIPS code for the state, however, the state-level
-data served by this API is limited to what the metro-level data files from the Census Bureau contain.</p>
-
-<p>The Census Bureau provides a composite file containing all geocodes:
-<a href="http://lehd.ces.census.gov/data/schema/latest/label_geography_all.csv">label_geography_all.csv</a></p>
-
-<h1>Indicators<a id="sec-5" name="sec-5"></a></h1>
-
-<p>The following table, taken from the
-<a href="http://lehd.ces.census.gov/data/schema/latest/lehd_public_use_schema.html#_a_id_indicators_a_indicators">LEHD Public Use Data Schema V4.0.5</a>, lists the indicator variables available in the data set.</p>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="left" />
-    <col class="left" />
-    <col class="left" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="left">Indicator Variable</th>
-      <th scope="col" class="left">Indicator Name</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="left">Emp</td>
-      <td class="left">Beginning-of-Quarter Employment: Counts</td>
-    </tr>
-    <tr>
-      <td class="left">EmpEnd</td>
-      <td class="left">End-of-Quarter Employment: Counts</td>
-    </tr>
-    <tr>
-      <td class="left">EmpS</td>
-      <td class="left">Full-Quarter Employment (Stable): Counts</td>
-    </tr>
-    <tr>
-      <td class="left">EmpSpv</td>
-      <td class="left">Full-Quarter Employment in the Previous Quarter: Counts</td>
-    </tr>
-    <tr>
-      <td class="left">EmpTotal</td>
-      <td class="left">Employment - Reference Quarter: Counts</td>
-    </tr>
-    <tr>
-      <td class="left">HirA</td>
-      <td class="left">Hires All: Counts (Accessions)</td>
-    </tr>
-    <tr>
-      <td class="left">HirN</td>
-      <td class="left">Hires New: Counts</td>
-    </tr>
-    <tr>
-      <td class="left">HirR</td>
-      <td class="left">Hires Recalls: Counts</td>
-    </tr>
-    <tr>
-      <td class="left">Sep</td>
-      <td class="left">Separations: Counts</td>
-    </tr>
-    <tr>
-      <td class="left">HirAEnd</td>
-      <td class="left">End-of-Quarter Hires</td>
-    </tr>
-    <tr>
-      <td class="left">HirAEndR</td>
-      <td class="left">End-of-Quarter Hiring Rate</td>
-    </tr>
-    <tr>
-      <td class="left">SepBeg</td>
-      <td class="left">Beginning-of-Quarter Separations</td>
-    </tr>
-    <tr>
-      <td class="left">SepBegR</td>
-      <td class="left">Beginning-of-Quarter Separation Rate</td>
-    </tr>
-    <tr>
-      <td class="left">HirAS</td>
-      <td class="left">Hires All (Stable): Counts (Flows into Full-Quarter Employment)</td>
-    </tr>
-    <tr>
-      <td class="left">HirNS</td>
-      <td class="left">Hires New (Stable): Counts (New Hires to Full-Quarter Status)</td>
-    </tr>
-    <tr>
-      <td class="left">SepS</td>
-      <td class="left">Separations (Stable): Counts (Flow out of Full-Quarter Employment)</td>
-    </tr>
-    <tr>
-      <td class="left">SepSnx</td>
-      <td class="left">Separations (Stable): Next Quarter: Counts (Flow out of Full-Quarter Employment)</td>
-    </tr>
-    <tr>
-      <td class="left">TurnOvrS</td>
-      <td class="left">Turnover (Stable)</td>
-    </tr>
-    <tr>
-      <td class="left">FrmJbGn</td>
-      <td class="left">Firm Job Gains: Counts (Job Creation)</td>
-    </tr>
-    <tr>
-      <td class="left">FrmJbLs</td>
-      <td class="left">Firm Job Loss: Counts (Job Destruction)</td>
-    </tr>
-    <tr>
-      <td class="left">FrmJbC</td>
-      <td class="left">Firm Job Change: Net Change</td>
-    </tr>
-    <tr>
-      <td class="left">HirAEndRepl</td>
-      <td class="left">Replacement Hires</td>
-    </tr>
-    <tr>
-      <td class="left">HirAEndReplr</td>
-      <td class="left">Replacement Hiring Rate</td>
-    </tr>
-    <tr>
-      <td class="left">FrmJbGnS</td>
-      <td class="left">Firm Job Gains (Stable): Counts</td>
-    </tr>
-    <tr>
-      <td class="left">FrmJbLsS</td>
-      <td class="left">Firm Job Loss (Stable): Counts</td>
-    </tr>
-    <tr>
-      <td class="left">FrmJbCS</td>
-      <td class="left">Job Change (Stable): Net Change</td>
-    </tr>
-    <tr>
-      <td class="left">EarnS</td>
-      <td class="left">Full Quarter Employment (Stable): Average Monthly Earnings</td>
-    </tr>
-    <tr>
-      <td class="left">EarnBeg</td>
-      <td class="left">Beginning-of-Quarter Employment: Average Monthly Earnings</td>
-    </tr>
-    <tr>
-      <td class="left">EarnHirAS</td>
-      <td class="left">Hires All (Stable): Average Monthly Earnings</td>
-    </tr>
-    <tr>
-      <td class="left">EarnHirNS</td>
-      <td class="left">Hires New (Stable): Average Monthly Earnings</td>
-    </tr>
-    <tr>
-      <td class="left">EarnSepS</td>
-      <td class="left">Separations (Stable): Average Monthly Earnings</td>
-    </tr>
-    <tr>
-      <td class="left">Payroll</td>
-      <td class="left">Total Quarterly Payroll: Sum</td>
-    </tr>
-  </tbody>
-</table>
-
-
-<p><em>Requested indicators must appear in the query parameters of a request, NOT in the dynamic URI.</em>
-The URI dynamic path segments must contain only the aggregation categories,
-"industry", "geography", "year", and "quarter".
-Requested indicators are specified using the (possibly repeated) "fields" query parameter.
-For example, to request "TurnOvrS" and "Payroll", the query portion of the request would contain
-<pre class="code">?fields=TurnOvrs&amp;fields=Payroll</pre>.</p>
-
-<p>A more detailed explanation of the query parameter syntax follows in the <a href="#sec-7">Syntax and Examples</a> section.</p>
-
-<p>Note that the status flag for each indicator is also available. Status flag names are simply
-the indicator name prepended with an "s".</p>
-
-<h1>Additional Query Parameters<a id="sec-6" name="sec-6"></a></h1>
-
-<p>In addition to the "fields" parameter explained in the previous section,
-other parameters are provided that allow the user to alter the
-structure of the response object.</p>
-
-<h2>Flat Responses<a id="sec-6-1" name="sec-6-1"></a></h2>
-
-<p>If the hierarchical structure of the response object is not desired,
-data may be returned as an array of rows by passing the query parameter <pre class="code">flat=true</pre>.</p>
-
-<h2>Flat Leaves<a id="sec-6-2" name="sec-6-2"></a></h2>
-
-<p>By default, the leafs of the hierarchical response object will be arrays.
-This may not be the desired functionality, so
-it is possible to request flat leaves with the <pre class="code">flatLeaves=true</pre> query parameter.
-Note that if the length of the leaf arrays does not equal 1,
-specifying "flatLeaves" will result in an error.
-Specifically, to request flat leaves,
-it is necessary to include "year" and "quarter" in the dynamic route
-because if they are not part of the response object&#39;s nesting structure,
-the leaf arrays will contain elements for each economic quarter.</p>
-
-<h2>Dense Responses<a id="sec-6-3" name="sec-6-3"></a></h2>
-
-<p>By default, the leaves of the response object will contain fields for each
-segment of the dynamic route. This means that information is repeated.
-For example, if the route contains <pre class="code">/industry/race/year/quarter</pre>, each of those categories
-will appear as a key in the response object&#39;s leaves with the respective variable&#39;s value,
-and therefore this information will also be contained in the keys of each layer of
-If the client has not specified "flat=true" in the query parameters,
-to remove this redundancy clients may specify "dense=true"
-This will remove from the leaves all information contained in the response"s
-heirarchial structure.</p>
-
-<p>Refer to the <a href="#sec-7">Syntax and Examples</a> section for greater details.</p>
-
-<h1>Syntax and Examples<a id="sec-7" name="sec-7"></a></h1>
-
-<p>Note: All data queries begin with the route segment <pre class="code">/data/</pre>.</p>
-
-<h3>Example 1</h3>
-
-<p><pre class="code">&lt;host server address&gt;/data/geography3510740/year20142016/quarter/industry00023/firmage01?fields=payroll&amp;dense=true&amp;flatLeaves=true</pre></p>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="left" />
-    <col class="left" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="left">Category</th>
-      <th scope="col" class="left">Requested</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="left">Geographic Area</td>
-      <td class="left">Albany-Schenectady-Troy, NY</td>
-    </tr>
-    <tr>
-      <td class="left">NAICS Sector</td>
-      <td class="left">Construction</td>
-    </tr>
-    <tr>
-      <td class="left">Years</td>
-      <td class="left">2014, 2015, 2016</td>
-    </tr>
-    <tr>
-      <td class="left">Quarters</td>
-      <td class="left">1, 2, 3, 4</td>
-    </tr>
-    <tr>
-      <td class="left">Firm ages</td>
-      <td class="left">"All Firm Ages", "0-1 Years"</td>
-    </tr>
-    <tr>
-      <td class="left">Indicator</td>
-      <td class="left">Total Quarterly Payroll</td>
-    </tr>
-    <tr>
-      <td class="left">Response Structure</td>
-      <td class="left">dense, flatLeaves</td>
-    </tr>
-  </tbody>
-
-</table>
-
-
-<p>Response:
-<pre class="code">
-{
-  "data": {
-    "3510740": {
-      "2014": {
-        "1": {
-          "23": {
-            "0": {
-              "payroll": "208426378"
-            },
-            "1": {
-              "payroll": "6568167"
+    <div class="container bs-docs-container">
+      <div class="row">
+            <div class="col-md-3" role="complementary">
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm" style="position:fixed">
+                <ul class="nav bs-docs-sidenav">
+            
+                  <li><a href="#sec-1">Introduction</a></li>
+                  <li><a href="#sec-2">QWI Dataset Overview</a></li>
+                  <li><a href="#sec-3">Additional Route Segments</a>
+            
+                  <ul>
+                    <li><a href="#sec-3-1">Specifying the Response Structure</a></li>
+                    <li><a href="#sec-3-2">Supported Category Combinations</a>
+            
+                    <ul>
+                      <li><a href="#sec-3-2-1">Supported Demographic and Establishment Category Interactions</a></li>
+                    </ul>
+                    </li>
+                  </ul>
+                  </li>
+                  <li><a href="#sec-4">Category Codes</a>
+            
+                    <ul>
+                      <li><a href="#sec-4-1">agegrp</a></li>
+                      <li><a href="#sec-4-2">education</a></li>
+                      <li><a href="#sec-4-3">ethnicity</a></li>
+                      <li><a href="#sec-4-4">race</a></li>
+                      <li><a href="#sec-4-5">firmage</a></li>
+                      <li><a href="#sec-4-6">firmsize</a></li>
+                      <li><a href="#sec-4-7">industry</a></li>
+                      <li><a href="#sec-4-8">geography</a></li>
+                    </ul>
+                  </li>
+                  <li><a href="#sec-5">Indicators</a></li>
+                  <li><a href="#sec-6">Additional Query Parameters</a>
+            
+                    <ul>
+                      <li><a href="#sec-6-1">flat responses</a></li>
+                      <li><a href="#sec-6-2">flat leaves</a></li>
+                      <li><a href="#sec-6-3">dense</a></li>
+                    </ul>
+                  </li>
+                  <li><a href="#sec-7">Syntax and Examples</a></li>
+                  <li><a href="#sec-8">Deployment</a></li>
+                </ul>
+              </nav>
+            </div>
+        <div class="col-md-9" role="main">
+          <div class="bs-docs-section">
+            
+            
+            <h1>TL;DR</h1>
+            
+            <p><a href="#sec-7">Syntax and Examples</a></p>
+            
+            <h1>Introduction<a id="sec-1" name="sec-1"></a></h1>
+            
+            <p>This project was created under a grant from the <a href="http://www.kauffman.org/">Ewing Marion Kauffman Foundation</a>.</p>
+            
+            <p>This repository contains code for an JSON API to
+            the U.S. Census Bureau&#39;s Quarterly Workforce Indicators
+            (<a href="http://lehd.ces.census.gov/data/">QWI</a>) dataset.
+            This application focuses on the Metropolitian level data from the QWI
+            due to the fact that the county level data takes over 2T of disk space.</p>
+            
+            <p>This project is composed entirely of JavaScript code and SQL scripts
+            that download the CSV files hosted on the Census Bureau&#39;s website
+            and uploads them to a Postgres database.
+            The only dependencies are a Postgres database and an Node environment,
+            and administrators need only run a couple of scripts to fire up an instance of this API.</p>
+            
+            <p>Table and column names map one-to-one with names from the Census data and documentation.
+            Users familiar with the QWI dataset should find the JSON API easy to learn, intuitive, and powerful.
+            For users not yet aquainted with the dataset, informative error messages should make learning
+            how to leverage this tool relatively easy.</p>
+            
+            <p>A Node/Express application server connects to the Postgres database and serves the content.
+            The performance of Node, together with clustered indices build on the database tables,
+            provide users with sub-second response times.
+            This API server can power interactive data exploration tools.</p>
+            
+            <h1>QWI Dataset Overview<a id="sec-2" name="sec-2"></a></h1>
+            
+            <p>From the <a href="http://lehd.ces.census.gov/doc/QWI_101.pdf">Quarterly Workforce Indicators 101</a> document:</p>
+            
+            <blockquote><p>The Quarterly Workforce Indicators (QWI) provide local labor market statistics by industry, worker
+            demographics, employer age and size. Unlike statistics tabulated from firm or person-level data, the QWI
+            source data are unique job-level data that link workers to their employers. Because of this link, labor market
+            data in the QWI is available by worker age, sex, educational attainment, and race/ethnicity. This allows for
+            analysis by demographics of a particular local labor market or industry &mdash; for instance, identifying industries with
+            aging workforces. Links between workers and firms also allow the QWI to identify worker flows &mdash; hires,
+            separations, and turnover&mdash;as well as net employment growth. As most hiring activity is the consequence of
+            worker turnover rather than employment growth, a focus on employment growth alone may misrepresent
+            employment opportunity in the local labor market. Wages by industry and demographics as well as by whether
+            the worker was newly hired are also available. QWI wages for new hires can be compared to wages for
+            continuing workers, and wage growth for similar workers across industries can be compared to identify
+            important local labor market trends.
+            The source data for the QWI is the Longitudinal Employer-Household Dynamics (LEHD) linked employeremployee
+            microdata. The LEHD data is massive longitudinal database covering over 95% of U.S. private sector
+            jobs. Much of this data is collected via a unique federal&mdash;state data sharing collaboration, the Local Employment
+            Dynamics (LED) partnership. LED is a cooperative venture between the LEHD program at the U.S. Census
+            Bureau and state agencies of all 50 states, the District of Columbia, Puerto Rico, and the U.S. Virgin Islands2.</p>
+            
+            <p>Partner states voluntarily submit quarterly data files from existing administrative record systems, which are
+            combined with a range of other data sources to generate public use products, including QWI and LODES (LEHD
+            Origin-Destination Employment Statistics, presented in OnTheMap) and other new products in development. By
+            integrating data used to administer public programs with existing census and surveys, a new national jobs
+            database is generated at very low cost and with no additional respondent burden.</p></blockquote>
+            
+            <p>The data from the U.S. Census Bureau is available tabulated to
+            national, state, metropolitan/micropolitan areas, county, and Workforce Investment Board (WIB) areas,
+            however <em>this API only serves data found in the metropolitian-level CSVs</em>.</p>
+            
+            <h1>Dynamic Routes<a id="sec-3" name="sec-3"></a></h1>
+            
+            <h2>Specifying the Response Structure<a id="sec-3-1" name="sec-3-1"></a></h2>
+            
+            <p>The <pre class="code">qwiAPI</pre> features <em>Dynamic Routes</em> that allow clients to query the dataset
+            based on worker demographics, employer characteristics, and/or industry,
+            The server response will be in the form of a JSON object
+            with a hierarchial structure that parallels the query&#39;s Dynamic Route.
+            In other words, <em>users of this API can specify the structure of the response object
+            through the stucture of the route they use to request the data</em>.
+            This functionality makes for exceptionally clean code in client apps.
+            (This behavior can be turned off via the <pre class="code">flat</pre> parameter, as described below.)</p>
+            
+            <p>For example, if the client wanted a response broken down by industry, then firmage,
+            the dynamic route would contain the sequence <pre class="code">/industry/firmage</pre>.
+            The response object would contain data nested in that order: each industry would have a object keyed by firmage.
+            Conversely, <pre class="code">/firmage/industry</pre> would yield a response where each firmage has an object keyed by industry code.</p>
+            
+            <p>To specifically request all 0-1 year firms in Construction,
+            the request would include the respective QWI firmage code
+            and NAICS industry code: <pre class="code">/industry00023/firmage1</pre>.
+            Notice that the industry value is zero-padded.</p>
+            
+            <p>The required code lengths for the route parameters are specified below in the <a href="">API Syntax</a> section.</p>
+            
+            <h2>Supported query parameters and their lengths<a id="sec-3-2" name="sec-3-2"></a></h2>
+            
+            <p>Each of the categories listed in the following table
+            can appear as a segment in the dynamic route.
+            Consequently, they can be used to specify the JSON response structure
+            and to filter the information in the response.
+            Values specified as filters <em>must be zero-padded</em> if the requested value
+            is less than the length specified in the following table.
+            (This can occur for geography and industry categories.)</p>
+            
+            <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+            
+              <colgroup>
+                <col class="left" />
+                <col class="left" />
+                <col class="left" />
+              </colgroup>
+            
+              <thead>
+                <tr>
+                  <th scope="col" class="left">Route Segment</th>
+                  <th scope="col" class="left">Length</th>
+                  <th scope="col" class="left">Description</th>
+                </tr>
+              </thead>
+            
+              <tbody>
+                <tr>
+                  <td class="left">geography</td>
+                  <td class="left">7</td>
+                  <td class="left">Geography code</td>
+                </tr>
+            
+                <tr>
+                  <td class="left">industry</td>
+                  <td class="left">5</td>
+                  <td class="left">Industry code</td>
+                </tr>
+            
+                <tr>
+                  <td class="left">sex</td>
+                  <td class="left">1</td>
+                  <td class="left">Gender code</td>
+                </tr>
+            
+                <tr>
+                  <td class="left">agegrp</td>
+                  <td class="left">3</td>
+                  <td class="left">Age group code (WIA)</td>
+                </tr>
+            
+                <tr>
+                  <td class="left">race</td>
+                  <td class="left">2</td>
+                  <td class="left">Race</td>
+                </tr>
+            
+                <tr>
+                  <td class="left">ethnicity</td>
+                  <td class="left">2</td>
+                  <td class="left">Ethnicity</td>
+                </tr>
+            
+                <tr>
+                  <td class="left">education</td>
+                  <td class="left">2</td>
+                  <td class="left">Education</td>
+                </tr>
+            
+                <tr>
+                  <td class="left">firmage</td>
+                  <td class="left">1</td>
+                  <td class="left">Firm Age group</td>
+                </tr>
+            
+                <tr>
+                  <td class="left">firmsize</td>
+                  <td class="left">1</td>
+                  <td class="left">Firm Size group</td>
+                </tr>
+            
+                <tr>
+                  <td class="left">year</td>
+                  <td class="left">4</td>
+                  <td class="left">Year</td>
+                </tr>
+            
+                <tr>
+                  <td class="left">quarter</td>
+                  <td class="left">1</td>
+                  <td class="left">Quarter</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            
+            <p>NOTE: if exactly two years are specified in the "year" segment of the route,
+            they will be interpreted as a span. For example the segment <pre class="code">year20012015</pre>
+            will return data from the range 2001 to 2015, inclusive. To turn off this behavior,
+            specify one of the years twice, as in <pre class="code">year200120152015</pre>.</p>
+            
+            <p>A more detailed explanation of the routing syntax follows in the <a href="#sec-7">Syntax and Examples</a> section.</p>
+            
+            <h2>Supported category combinations<a id="sec-2-1" name="sec-3-2-1"></a></h2>
+            
+            <p>From the <a href="http://lehd.ces.census.gov/doc/QWI_101.pdf">Quarterly Workforce Indicators 101</a> document:</p>
+            
+            <blockquote><p>The QWI are aggregated from the job level to establishments, and then to a number of higher level categories
+            for public release. These categories are interacted in various combinations on the public release files. Within
+            the public release files, totals for each category are included along with detailed components.</p>
+            
+            <p>The demographic categories available on the QWI include age, sex, race, ethnicity, and education. The
+            interactions selected for publication include:
+            <ul>
+               <li>Sex by Age [sa]</li>
+               <li>Race by Ethnicity [rh]</li>
+               <li>Sex by Education [se]</li>
+            </ul></p>
+            
+            <p>Firm age and size are defined at the national level, rather than the state level.
+            A national firm may frequently be larger or older than the part of that firm found in any one state.
+            Firm age and size are reported only for private sector firms, and are not interacted with each other.
+            <ul>
+              <li>Firm Age [fa]</li>
+              <li>Firm Size [fs]</li>
+            </ul></p></blockquote>
+            
+            <p>The U.S. Census Bureau provides data for each combination of demographic and firm categories interactions,
+            but, <em>the listed category interactions within the demographic and firm classes cannot be combined</em>.
+            All combinations provided by the Census Bureau are available through this API.
+            Category interactions outside of these are not supported and will result in an error message.</p>
+            
+            <p>The following categories can be used in combination with any others:</p>
+            
+            <ul>
+              <li>geography</li>
+              <li>industry</li>
+              <li>year</li>
+              <li>quarter</li>
+            </ul>
+            
+            
+            <p>In fact, <em>"geography" is required in all requests</em>. (The dataset is too large to return all geographies by default.)</p>
+            
+            <p>"year" and "quarter" are added automatically to the selected fields.
+            Even if they do not appear in a dynamic route,
+            they will appear in the response leaves.</p>
+            
+            <p>For the sake clarity, supported demographic and establishment category interactions shown in the following table.</p>
+            
+            <h3>Supported Demographic and Establishment Category Interactions</h3>
+            
+            <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+            
+              <colgroup>
+                <col class="center" />
+                <col class="center" />
+                <col class="left" />
+                <col class="left" />
+              </colgroup>
+            
+              <thead>
+                <tr>
+                  <th scope="col" class="left">Demographic Categories</th>
+                  <th scope="col" class="left">Firm Categories</th>
+                </tr>
+              </thead>
+            
+              <tbody>
+                <tr>
+                  <td class="left">sex &amp; agegrp</td>
+                  <td class="left">firmage</td>
+                </tr>
+            
+                <tr>
+                  <td class="left">sex & education</td>
+                  <td class="left">firmage</td>
+                </tr>
+            
+                <tr>
+                  <td class="left">race & ethnicity</td>
+                  <td class="left">firmage</td>
+                </tr>
+            
+                <tr>
+                  <td class="left">sex & agegrp</td>
+                  <td class="left">firmsize</td>
+                </tr>
+            
+                <tr>
+                  <td class="left">sex & education</td>
+                  <td class="left">firmsize</td>
+                </tr>
+            
+                <tr>
+                  <td class="left">race & ethnicity</td>
+                  <td class="left">firmsize</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            
+            <p>For example, API clients can request data for all female employees
+            with a bachelor" sub-route:
+              <pre class="code">/sex2/educationE4</pre></p>
+            
+            <p>However, a query for all 35-44 year old employees
+            with a bachelor"s is invalid because
+            the combination of employee age group and education level is not supported.
+              <del><pre class="code">/agegrpA05/educationE4</pre></del></p>
+            
+            <p>A more detailed explanation of the routing syntax follows in the <a href="#sec-7">Syntax and Examples</a> section.</p>
+            
+            <h1>Category Codes<a id="sec-4" name="sec-4"></a></h1>
+            
+            <p>For reference, the "Categorical Variables" section of the
+            <a href="http://lehd.ces.census.gov/doc/QWI_101.pdf">Quarterly Workforce Indicators 101</a>
+            document is included below.
+            The left-hand column in each of the above tables
+            shows values that can be used to filter the response&#39;s information.
+            Note that the above tables contain all the values in the domain of each category.
+            If filter values outside of a category&#39;s domain are specified, an error
+            message will be sent to the client.</p>
+            
+            <p>NOTE: By default, the code representing the aggregate value for each category is selected.</p>
+            
+            <h3>agegrp<a id="sec-4-1" name="sec-4-1"></a></h3>
+            
+            <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+            
+              <colgroup>
+                <col class="center" />
+                <col class="center" />
+                <col class="center" />
+              </colgroup>
+            
+              <thead>
+                <tr>
+                  <th scope="col" class="center">agegrp</th>
+                  <th scope="col" class="center">label</th>
+                </tr>
+              </thead>
+            
+              <tbody>
+                <tr>
+                  <td class="center">A00</td>
+                  <td class="center">All Ages (14-99)</td>
+                </tr>
+            
+                <tr>
+                  <td class="center">A01</td>
+                  <td class="center">14-18</td>
+                </tr>
+                <tr>
+                  <td class="center">A02</td>
+                  <td class="center">19-21</td>
+                </tr>
+                <tr>
+                  <td class="center">A03</td>
+                  <td class="center">22-24</td>
+                </tr>
+                <tr>
+                  <td class="center">A04</td>
+                  <td class="center">25-34</td>
+                </tr>
+                <tr>
+                  <td class="center">A05</td>
+                  <td class="center">35-44</td>
+                </tr>
+                <tr>
+                  <td class="center">A06</td>
+                  <td class="center">45-54</td>
+                </tr>
+                <tr>
+                  <td class="center">A07</td>
+                  <td class="center">55-64</td>
+                </tr>
+                <tr>
+                  <td class="center">A08</td>
+                  <td class="center">65-99</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            
+            <h3>education<a id="sec-4-2" name="sec-4-2"></a></h3>
+            
+            <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+            
+              <colgroup>
+                <col class="center" />
+                <col class="center" />
+                <col class="center" />
+              </colgroup>
+            
+              <thead>
+                <tr>
+                  <th scope="col" class="center">education</th>
+                  <th scope="col" class="center">label</th>
+                </tr>
+              </thead>
+            
+              <tbody>
+                <tr>
+                  <td class="center">E0</td>
+                  <td class="center">All Education Categories</td>
+                </tr>
+                <tr>
+                  <td class="center">E1</td>
+                  <td class="center">Less than high school</td>
+                </tr>
+                <tr>
+                  <td class="center">E2</td>
+                  <td class="center">High school or equivalent, no college</td>
+                </tr>
+                <tr>
+                  <td class="center">E3</td>
+                  <td class="center">Some college or Associate degree</td>
+                </tr>
+                <tr>
+                  <td class="center">E4</td>
+                  <td class="center">Bachelor&#39;s degree or advanced degree</td>
+                </tr>
+                <tr>
+                  <td class="center">E5</td>
+                  <td class="center">Educational attainment not available (workers aged 24 or younger)</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            
+            <h3>ethnicity<a id="sec-4-3" name="sec-4-3"></a></h3>
+            
+            <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+            
+              <colgroup>
+                <col class="center" />
+                <col class="center" />
+                <col class="center" />
+              </colgroup>
+            
+              <thead>
+                <tr>
+                  <th scope="col" class="center">education</th>
+                  <th scope="col" class="center">label</th>
+                </tr>
+              </thead>
+            
+              <tbody>
+                <tr>
+                  <td class="center">A0</td>
+                  <td class="center">All Ethnicities</td>
+                </tr>
+                <tr>
+                  <td class="center">A1</td>
+                  <td class="center">Not Hispanic or Latino</td>
+                </tr>
+                <tr>
+                  <td class="center">A2</td>
+                  <td class="center">Hispanic or Latino</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            
+            <h3>race<a id="sec-4-4" name="sec-4-4"></a></h3>
+            
+            <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+            
+              <colgroup>
+                <col class="center" />
+                <col class="center" />
+                <col class="center" />
+              </colgroup>
+            
+              <thead>
+                <tr>
+                  <th scope="col" class="center">race</th>
+                  <th scope="col" class="center">label</th>
+                </tr>
+              </thead>
+            
+              <tbody>
+                <tr>
+                  <td class="center">A0</td>
+                  <td class="center">All Races</td>
+                </tr>
+                <tr>
+                  <td class="center">A1</td>
+                  <td class="center">White Alone</td>
+                </tr>
+                <tr>
+                  <td class="center">A2</td>
+                  <td class="center">Black or African American Alone</td>
+                </tr>
+                <tr>
+                  <td class="center">A3</td>
+                  <td class="center">American Indian or Alaska Native Alone</td>
+                </tr>
+                <tr>
+                  <td class="center">A4</td>
+                  <td class="center">Asian Alone</td>
+                </tr>
+                <tr>
+                  <td class="center">A5</td>
+                  <td class="center">Native Hawaiian or Other Pacific Islander Alone</td>
+                </tr>
+                <tr>
+                  <td class="center">A6</td>
+                  <td class="center">Some Other Race Alone (Not Used)</td>
+                </tr>
+                <tr>
+                  <td class="center">A6</td>
+                  <td class="center">Two or More Race Groups</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            
+            <h3>firmage<a id="sec-4-5" name="sec-4-5"></a></h3>
+            
+            <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+            
+              <colgroup>
+                <col class="center" />
+                <col class="center" />
+                <col class="center" />
+              </colgroup>
+            
+              <thead>
+                <tr>
+                  <th scope="col" class="center">firmage</th>
+                  <th scope="col" class="center">label</th>
+                </tr>
+              </thead>
+            
+              <tbody>
+                <tr>
+                  <td class="center">0</td>
+                  <td class="center">All Firm Ages</td>
+                </tr>
+                <tr>
+                  <td class="center">A1</td>
+                  <td class="center">0-1 Years</td>
+                </tr>
+                <tr>
+                  <td class="center">2</td>
+                  <td class="center">2-3 Years</td>
+                </tr>
+                <tr>
+                  <td class="center">3</td>
+                  <td class="center">4-5 Years</td>
+                </tr>
+                <tr>
+                  <td class="center">4</td>
+                  <td class="center">6-10 Years</td>
+                </tr>
+                <tr>
+                  <td class="center">5</td>
+                  <td class="center">11+ Years</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            
+            <h3>firmsize<a id="sec-4-6" name="sec-4-6"></a></h3>
+            
+            <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+            
+              <colgroup>
+                <col class="left" />
+                <col class="left" />
+                <col class="left" />
+              </colgroup>
+            
+              <thead>
+                <tr>
+                  <th scope="col" class="center">firmsize</th>
+                  <th scope="col" class="left">label</th>
+                </tr>
+              </thead>
+            
+              <tbody>
+                <tr>
+                  <td class="center">0</td>
+                  <td class="left">0-19 Employees</td>
+                </tr>
+                <tr>
+                  <td class="center">1</td>
+                  <td class="left">20-49 Employees</td>
+                </tr>
+                <tr>
+                  <td class="center">2</td>
+                  <td class="left">50-249 Employees</td>
+                </tr>
+                <tr>
+                  <td class="center">3</td>
+                  <td class="left">250-499 Employees</td>
+                </tr>
+                <tr>
+                  <td class="center">4</td>
+                  <td class="left">500+ Employees</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            
+            <h3>industry<a id="sec-4-7" name="sec-4-7"></a></h3>
+            
+            <p>Currently, this API contains only the Metropolitan level data from level data from the QWI dataset.
+            At this geographic level, with the firm categories, the Census Bureau only provides
+            "industry" breakdowns at the 2-digit NAICS Sectors detail level.
+            (4-digit breakdowns are available without firm characteristics.)</p>
+            
+            <h3>geography<a id="sec-4-8" name="sec-4-8"></a></h3>
+            
+            <p>At least one "geography" code is required in the dynamic route. Many can be specified.</p>
+            
+            <p>From <a href="http://lehd.ces.census.gov/data/schema/latest/lehd_public_use_schema.html#geo_level">LEHD Public Use Data Schema V4.0.5</a></p>
+            
+            <blockquote><p>Metropolitan codes are constructed from the 2-digit state FIPS code
+            and the 5-digit <a href="http://www.census.gov/population/metro/">CBSA</a> code provided by the
+            Census Bureau&#39;s Geography Division.</p>
+            
+            <p>In the QWI, the metropolitan/micropolitan areas are the state parts of the full CBSA areas.</p></blockquote>
+            
+            <p>In otherwords, to specify a metropolitan area in a request,
+            <em>clients must prepend the state&#39;s 2-digit FIPS code to the metro area&#39;s 5-digit CBSA code.</em>
+            Thus, geographies are 7-digits in length. Note: you can query for state level data as well
+            by zero-padding the 2-digit FIPS code for the state, however, the state-level
+            data served by this API is limited to what the metro-level data files from the Census Bureau contain.</p>
+            
+            <p>The Census Bureau provides a composite file containing all geocodes:
+            <a href="http://lehd.ces.census.gov/data/schema/latest/label_geography_all.csv">label_geography_all.csv</a></p>
+            
+            <h1>Indicators<a id="sec-5" name="sec-5"></a></h1>
+            
+            <p>The following table, taken from the
+            <a href="http://lehd.ces.census.gov/data/schema/latest/lehd_public_use_schema.html#_a_id_indicators_a_indicators">LEHD Public Use Data Schema V4.0.5</a>, lists the indicator variables available in the data set.</p>
+            
+            <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+            
+              <colgroup>
+                <col class="left" />
+                <col class="left" />
+                <col class="left" />
+              </colgroup>
+            
+              <thead>
+                <tr>
+                  <th scope="col" class="left">Indicator Variable</th>
+                  <th scope="col" class="left">Indicator Name</th>
+                </tr>
+              </thead>
+            
+              <tbody>
+                <tr>
+                  <td class="left">Emp</td>
+                  <td class="left">Beginning-of-Quarter Employment: Counts</td>
+                </tr>
+                <tr>
+                  <td class="left">EmpEnd</td>
+                  <td class="left">End-of-Quarter Employment: Counts</td>
+                </tr>
+                <tr>
+                  <td class="left">EmpS</td>
+                  <td class="left">Full-Quarter Employment (Stable): Counts</td>
+                </tr>
+                <tr>
+                  <td class="left">EmpSpv</td>
+                  <td class="left">Full-Quarter Employment in the Previous Quarter: Counts</td>
+                </tr>
+                <tr>
+                  <td class="left">EmpTotal</td>
+                  <td class="left">Employment - Reference Quarter: Counts</td>
+                </tr>
+                <tr>
+                  <td class="left">HirA</td>
+                  <td class="left">Hires All: Counts (Accessions)</td>
+                </tr>
+                <tr>
+                  <td class="left">HirN</td>
+                  <td class="left">Hires New: Counts</td>
+                </tr>
+                <tr>
+                  <td class="left">HirR</td>
+                  <td class="left">Hires Recalls: Counts</td>
+                </tr>
+                <tr>
+                  <td class="left">Sep</td>
+                  <td class="left">Separations: Counts</td>
+                </tr>
+                <tr>
+                  <td class="left">HirAEnd</td>
+                  <td class="left">End-of-Quarter Hires</td>
+                </tr>
+                <tr>
+                  <td class="left">HirAEndR</td>
+                  <td class="left">End-of-Quarter Hiring Rate</td>
+                </tr>
+                <tr>
+                  <td class="left">SepBeg</td>
+                  <td class="left">Beginning-of-Quarter Separations</td>
+                </tr>
+                <tr>
+                  <td class="left">SepBegR</td>
+                  <td class="left">Beginning-of-Quarter Separation Rate</td>
+                </tr>
+                <tr>
+                  <td class="left">HirAS</td>
+                  <td class="left">Hires All (Stable): Counts (Flows into Full-Quarter Employment)</td>
+                </tr>
+                <tr>
+                  <td class="left">HirNS</td>
+                  <td class="left">Hires New (Stable): Counts (New Hires to Full-Quarter Status)</td>
+                </tr>
+                <tr>
+                  <td class="left">SepS</td>
+                  <td class="left">Separations (Stable): Counts (Flow out of Full-Quarter Employment)</td>
+                </tr>
+                <tr>
+                  <td class="left">SepSnx</td>
+                  <td class="left">Separations (Stable): Next Quarter: Counts (Flow out of Full-Quarter Employment)</td>
+                </tr>
+                <tr>
+                  <td class="left">TurnOvrS</td>
+                  <td class="left">Turnover (Stable)</td>
+                </tr>
+                <tr>
+                  <td class="left">FrmJbGn</td>
+                  <td class="left">Firm Job Gains: Counts (Job Creation)</td>
+                </tr>
+                <tr>
+                  <td class="left">FrmJbLs</td>
+                  <td class="left">Firm Job Loss: Counts (Job Destruction)</td>
+                </tr>
+                <tr>
+                  <td class="left">FrmJbC</td>
+                  <td class="left">Firm Job Change: Net Change</td>
+                </tr>
+                <tr>
+                  <td class="left">HirAEndRepl</td>
+                  <td class="left">Replacement Hires</td>
+                </tr>
+                <tr>
+                  <td class="left">HirAEndReplr</td>
+                  <td class="left">Replacement Hiring Rate</td>
+                </tr>
+                <tr>
+                  <td class="left">FrmJbGnS</td>
+                  <td class="left">Firm Job Gains (Stable): Counts</td>
+                </tr>
+                <tr>
+                  <td class="left">FrmJbLsS</td>
+                  <td class="left">Firm Job Loss (Stable): Counts</td>
+                </tr>
+                <tr>
+                  <td class="left">FrmJbCS</td>
+                  <td class="left">Job Change (Stable): Net Change</td>
+                </tr>
+                <tr>
+                  <td class="left">EarnS</td>
+                  <td class="left">Full Quarter Employment (Stable): Average Monthly Earnings</td>
+                </tr>
+                <tr>
+                  <td class="left">EarnBeg</td>
+                  <td class="left">Beginning-of-Quarter Employment: Average Monthly Earnings</td>
+                </tr>
+                <tr>
+                  <td class="left">EarnHirAS</td>
+                  <td class="left">Hires All (Stable): Average Monthly Earnings</td>
+                </tr>
+                <tr>
+                  <td class="left">EarnHirNS</td>
+                  <td class="left">Hires New (Stable): Average Monthly Earnings</td>
+                </tr>
+                <tr>
+                  <td class="left">EarnSepS</td>
+                  <td class="left">Separations (Stable): Average Monthly Earnings</td>
+                </tr>
+                <tr>
+                  <td class="left">Payroll</td>
+                  <td class="left">Total Quarterly Payroll: Sum</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            
+            <p><em>Requested indicators must appear in the query parameters of a request, NOT in the dynamic URI.</em>
+            The URI dynamic path segments must contain only the aggregation categories,
+            "industry", "geography", "year", and "quarter".
+            Requested indicators are specified using the (possibly repeated) "fields" query parameter.
+            For example, to request "TurnOvrS" and "Payroll", the query portion of the request would contain
+            <pre class="code">?fields=TurnOvrs&amp;fields=Payroll</pre>.</p>
+            
+            <p>A more detailed explanation of the query parameter syntax follows in the <a href="#sec-7">Syntax and Examples</a> section.</p>
+            
+            <p>Note that the status flag for each indicator is also available. Status flag names are simply
+            the indicator name prepended with an "s".</p>
+            
+            <h1>Additional Query Parameters<a id="sec-6" name="sec-6"></a></h1>
+            
+            <p>In addition to the "fields" parameter explained in the previous section,
+            other parameters are provided that allow the user to alter the
+            structure of the response object.</p>
+            
+            <h2>Flat Responses<a id="sec-6-1" name="sec-6-1"></a></h2>
+            
+            <p>If the hierarchical structure of the response object is not desired,
+            data may be returned as an array of rows by passing the query parameter <pre class="code">flat=true</pre>.</p>
+            
+            <h2>Flat Leaves<a id="sec-6-2" name="sec-6-2"></a></h2>
+            
+            <p>By default, the leafs of the hierarchical response object will be arrays.
+            This may not be the desired functionality, so
+            it is possible to request flat leaves with the <pre class="code">flatLeaves=true</pre> query parameter.
+            Note that if the length of the leaf arrays does not equal 1,
+            specifying "flatLeaves" will result in an error.
+            Specifically, to request flat leaves,
+            it is necessary to include "year" and "quarter" in the dynamic route
+            because if they are not part of the response object&#39;s nesting structure,
+            the leaf arrays will contain elements for each economic quarter.</p>
+            
+            <h2>Dense Responses<a id="sec-6-3" name="sec-6-3"></a></h2>
+            
+            <p>By default, the leaves of the response object will contain fields for each
+            segment of the dynamic route. This means that information is repeated.
+            For example, if the route contains <pre class="code">/industry/race/year/quarter</pre>, each of those categories
+            will appear as a key in the response object&#39;s leaves with the respective variable&#39;s value,
+            and therefore this information will also be contained in the keys of each layer of
+            If the client has not specified "flat=true" in the query parameters,
+            to remove this redundancy clients may specify "dense=true"
+            This will remove from the leaves all information contained in the response"s
+            heirarchial structure.</p>
+            
+            <p>Refer to the <a href="#sec-7">Syntax and Examples</a> section for greater details.</p>
+            
+            <h1>Syntax and Examples<a id="sec-7" name="sec-7"></a></h1>
+            
+            <p>Note: All data queries begin with the route segment <pre class="code">/data/</pre>.</p>
+            
+            <h3>Example 1</h3>
+            
+            <p><pre class="code">&lt;host server address&gt;/data/geography3510740/year20142016/quarter/industry00023/firmage01?fields=payroll&amp;dense=true&amp;flatLeaves=true</pre></p>
+            
+            <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+            
+              <colgroup>
+                <col class="left" />
+                <col class="left" />
+              </colgroup>
+            
+              <thead>
+                <tr>
+                  <th scope="col" class="left">Category</th>
+                  <th scope="col" class="left">Requested</th>
+                </tr>
+              </thead>
+            
+              <tbody>
+                <tr>
+                  <td class="left">Geographic Area</td>
+                  <td class="left">Albany-Schenectady-Troy, NY</td>
+                </tr>
+                <tr>
+                  <td class="left">NAICS Sector</td>
+                  <td class="left">Construction</td>
+                </tr>
+                <tr>
+                  <td class="left">Years</td>
+                  <td class="left">2014, 2015, 2016</td>
+                </tr>
+                <tr>
+                  <td class="left">Quarters</td>
+                  <td class="left">1, 2, 3, 4</td>
+                </tr>
+                <tr>
+                  <td class="left">Firm ages</td>
+                  <td class="left">"All Firm Ages", "0-1 Years"</td>
+                </tr>
+                <tr>
+                  <td class="left">Indicator</td>
+                  <td class="left">Total Quarterly Payroll</td>
+                </tr>
+                <tr>
+                  <td class="left">Response Structure</td>
+                  <td class="left">dense, flatLeaves</td>
+                </tr>
+              </tbody>
+            
+            </table>
+            
+            
+            <p>Response:
+            <pre class="code">
+            {
+              "data": {
+                "3510740": {
+                  "2014": {
+                    "1": {
+                      "23": {
+                        "0": {
+                          "payroll": "208426378"
+                        },
+                        "1": {
+                          "payroll": "6568167"
+                        }
+                      }
+                    },
+                    "2": {
+                      "23": {
+                        "0": {
+                          "payroll": "225950219"
+                        },
+                        "1": {
+                          "payroll": "6964256"
+                        }
+                      }
+                    },
+                    "3": {
+                      "23": {
+                        "0": {
+                          "payroll": "235418956"
+                        },
+                        "1": {
+                          "payroll": "7972830"
+                        }
+                      }
+                    }
+                  },
+                  "2015": {
+                    "1": {
+                      "23": {
+                        "0": {
+                          "payroll": "212303401"
+                        },
+                        "1": {
+                          "payroll": "7862891"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
-          }
-        },
-        "2": {
-          "23": {
-            "0": {
-              "payroll": "225950219"
-            },
-            "1": {
-              "payroll": "6964256"
+            </pre></p>
+            
+            <h3>Example 2</h3>
+            
+            <p><pre class="code">&lt;host server address&gt;/data/year200820142014//quarter/educationE2E4/geography1845460?fields=EarnSepS&amp;fields=EarnHirAS&amp;fields=FrmJbCS&amp;dense=true&amp;flatLeaves=true</pre></p>
+            
+            <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+            
+              <colgroup>
+                <col class="left" />
+                <col class="left" />
+              </colgroup>
+            
+              <thead>
+                <tr>
+                  <th scope="col" class="left">Category</th>
+                  <th scope="col" class="left">Requested</th>
+                </tr>
+              </thead>
+            
+              <tbody>
+                <tr>
+                  <td class="left">Years</td>
+                  <td class="left">2008, 2014</td>
+                </tr>
+                <tr>
+                  <td class="left">Quarters</td>
+                  <td class="left">1, 2, 3, 4</td>
+                </tr>
+                <tr>
+                  <td class="left">NAICS Sector</td>
+                  <td class="left">All</td>
+                </tr>
+                <tr>
+                  <td class="left">Education Levels</td>
+                  <td class="left">"High school or equivalent, no college", "Bachelor&#39;s degree or advanced degree"</td>
+                </tr>
+                <tr>
+                  <td class="left">Geographic Areas</td>
+                  <td class="left">Terre Haute, IN</td>
+                </tr>
+                <tr>
+                  <td class="left">Indicators</td>
+                  <td class="left">Hires All (Stable): Average Monthly Earnings, Separations (Stable): Average Monthly Earnings, Job Change (Stable): Net Change</td>
+                </tr>
+                <tr>
+                  <td class="left">Response Structure</td>
+                  <td class="left">dense, flatLeaves</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            
+            <p>Response:
+            <pre class="code">
+            {
+              "data": {
+                "1845460": {
+                  "2008": {
+                    "1": {
+                      "E2": {
+                        "earnseps": "2168",
+                        "earnhiras": "2096",
+                        "frmjbcs": "10"
+                      },
+                      "E4": {
+                        "earnseps": "3414",
+                        "earnhiras": "4250",
+                        "frmjbcs": "151"
+                      }
+                    },
+                    "2": {
+                      "E4": {
+                        "earnseps": "2984",
+                        "earnhiras": "2978",
+                        "frmjbcs": "-126"
+                      },
+                      "E2": {
+                        "earnseps": "2042",
+                        "earnhiras": "1985",
+                        "frmjbcs": "-281"
+                      }
+                    },
+                    "3": {
+                      "E2": {
+                        "earnseps": "2181",
+                        "earnhiras": "2184",
+                        "frmjbcs": "380"
+                      },
+                      "E4": {
+                        "earnseps": "3701",
+                        "earnhiras": "3513",
+                        "frmjbcs": "244"
+                      }
+                    },
+                    "4": {
+                      "E4": {
+                        "earnseps": "3090",
+                        "earnhiras": "3236",
+                        "frmjbcs": "59"
+                      },
+                      "E2": {
+                        "earnseps": "2020",
+                        "earnhiras": "1969",
+                        "frmjbcs": "-55"
+                      }
+                    }
+                  },
+                  "2014": {
+                    "1": {
+                      "E2": {
+                        "earnseps": "2063",
+                        "earnhiras": "1898",
+                        "frmjbcs": "-72"
+                      },
+                      "E4": {
+                        "earnseps": "3057",
+                        "earnhiras": "2513",
+                        "frmjbcs": "2"
+                      }
+                    },
+                    "2": {
+                      "E4": {
+                        "earnseps": "3004",
+                        "earnhiras": "3293",
+                        "frmjbcs": "-106"
+                      },
+                      "E2": {
+                        "earnseps": "2094",
+                        "earnhiras": "2359",
+                        "frmjbcs": "-251"
+                      }
+                    },
+                    "3": {
+                      "E2": {
+                        "earnseps": "2278",
+                        "earnhiras": "2321",
+                        "frmjbcs": "59"
+                      },
+                      "E4": {
+                        "earnseps": "3392",
+                        "earnhiras": "2878",
+                        "frmjbcs": "-10"
+                      }
+                    },
+                    "4": {
+                      "E2": {
+                        "earnseps": "2352",
+                        "earnhiras": "2358",
+                        "frmjbcs": "-202"
+                      },
+                      "E4": {
+                        "earnseps": "3283",
+                        "earnhiras": "3022",
+                        "frmjbcs": "-52"
+                      }
+                    }
+                  }
+                }
+              }
             }
-          }
-        },
-        "3": {
-          "23": {
-            "0": {
-              "payroll": "235418956"
-            },
-            "1": {
-              "payroll": "7972830"
+            </pre></p>
+            
+            <h3>Example 3</h3>
+            
+            <p><pre class="code">&lt;host server address&gt;/data/year20102015/industry00054/geography0641940/educationE4/sex?fields=HirNS&amp;fields=EarnHirNS&amp;flat=true</pre></p>
+            
+            <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+            
+              <colgroup>
+                <col class="left" />
+                <col class="left" />
+              </colgroup>
+            
+              <thead>
+                <tr>
+                  <th scope="col" class="left">Category</th>
+                  <th scope="col" class="left">Requested</th>
+                </tr>
+              </thead>
+            
+              <tbody>
+                <tr>
+                  <td class="left">Years</td>
+                  <td class="left">2010 to 2015</td>
+                </tr>
+                <tr>
+                  <td class="left">NAICS Sector</td>
+                  <td class="left">Professional, Scientific, and Technical Services</td>
+                </tr>
+                <tr>
+                  <td class="left">Geographic Areas</td>
+                  <td class="left"> San Jose-Sunnyvale-Santa Clara, CA (Silicon Valley)</td>
+                </tr>
+                <tr>
+                  <td class="left">Education Level</td>
+                  <td class="left">"Bachelor&#39;s degree or advanced degree"</td>
+                </tr>
+                <tr>
+                  <td class="left">Sex</td>
+                  <td class="left">male, female</td>
+                </tr>
+                <tr>
+                  <td class="left">Indicators</td>
+                  <td class="left">Hires New (Stable): Counts, Hires New (Stable): Average Monthly Earnings</td>
+                </tr>
+                <tr>
+                  <td class="left">Response Structure</td>
+                  <td class="left">flat</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            
+            <p>Response:
+            <pre class="code">
+            {
+              "data": [
+                {
+                  "year": "2014",
+                  "industry": "54 ",
+                  "geography": "0641940 ",
+                  "education": "E4",
+                  "sex": "1",
+                  "hirns": "2704",
+                  "earnhirns": "11276",
+                  "quarter": "1"
+                },
+                {
+                  "year": "2014",
+                  "industry": "54 ",
+                  "geography": "0641940 ",
+                  "education": "E4",
+                  "sex": "2",
+                  "hirns": "1390",
+                  "earnhirns": "8071",
+                  "quarter": "1"
+                },
+                {
+                  "year": "2014",
+                  "industry": "54 ",
+                  "geography": "0641940 ",
+                  "education": "E4",
+                  "sex": "1",
+                  "hirns": "2748",
+                  "earnhirns": "11542",
+                  "quarter": "2"
+                },
+                {
+                  "year": "2014",
+                  "industry": "54 ",
+                  "geography": "0641940 ",
+                  "education": "E4",
+                  "sex": "2",
+                  "hirns": "1533",
+                  "earnhirns": "8392",
+                  "quarter": "2"
+                },
+                {
+                  "year": "2014",
+                  "industry": "54 ",
+                  "geography": "0641940 ",
+                  "education": "E4",
+                  "sex": "2",
+                  "hirns": "1625",
+                  "earnhirns": "8609",
+                  "quarter": "3"
+                },
+                {
+                  "year": "2014",
+                  "industry": "54 ",
+                  "geography": "0641940 ",
+                  "education": "E4",
+                  "sex": "1",
+                  "hirns": "3044",
+                  "earnhirns": "11519",
+                  "quarter": "3"
+                },
+                {
+                  "year": "2014",
+                  "industry": "54 ",
+                  "geography": "0641940 ",
+                  "education": "E4",
+                  "sex": "1",
+                  "hirns": "2927",
+                  "earnhirns": "12317",
+                  "quarter": "4"
+                },
+                {
+                  "year": "2014",
+                  "industry": "54 ",
+                  "geography": "0641940 ",
+                  "education": "E4",
+                  "sex": "2",
+                  "hirns": "1662",
+                  "earnhirns": "9474",
+                  "quarter": "4"
+                },
+                {
+                  "year": "2015",
+                  "industry": "54 ",
+                  "geography": "0641940 ",
+                  "education": "E4",
+                  "sex": "1",
+                  "hirns": "2782",
+                  "earnhirns": "11884",
+                  "quarter": "1"
+                },
+                {
+                  "year": "2015",
+                  "industry": "54 ",
+                  "geography": "0641940 ",
+                  "education": "E4",
+                  "sex": "2",
+                  "hirns": "1552",
+                  "earnhirns": "8816",
+                  "quarter": "1"
+                }
+              ]
             }
-          }
-        }
-      },
-      "2015": {
-        "1": {
-          "23": {
-            "0": {
-              "payroll": "212303401"
-            },
-            "1": {
-              "payroll": "7862891"
-            }
-          }
-        }
-      }
-    }
-  }
-}
-</pre></p>
+            </pre></p>
+            
+            <h1>Deployment<a id="sec-8" name="sec-8"></a></h1>
+            
+            <p>NOTE: These scripts will take hours to run.</p>
+            
+            <p>Configuration files are in <pre class="code">/config/</pre>.
+            You should definitely change the default passwords.</p>
+            
+            <pre><pre class="code">npm install --prod
+            cd bin/
+            ./initQWIDatabase.sh //!!! DROPS EXISTING QWI_POSTGRES_DB DATABASE AND QWI_POSTGRES_USER !!!
+            ./createTables.sh
+            ./loadData.sh
+            ./createIndices.sh
+            </pre></pre>
 
-<h3>Example 2</h3>
-
-<p><pre class="code">&lt;host server address&gt;/data/year200820142014//quarter/educationE2E4/geography1845460?fields=EarnSepS&amp;fields=EarnHirAS&amp;fields=FrmJbCS&amp;dense=true&amp;flatLeaves=true</pre></p>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="left" />
-    <col class="left" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="left">Category</th>
-      <th scope="col" class="left">Requested</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="left">Years</td>
-      <td class="left">2008, 2014</td>
-    </tr>
-    <tr>
-      <td class="left">Quarters</td>
-      <td class="left">1, 2, 3, 4</td>
-    </tr>
-    <tr>
-      <td class="left">NAICS Sector</td>
-      <td class="left">All</td>
-    </tr>
-    <tr>
-      <td class="left">Education Levels</td>
-      <td class="left">"High school or equivalent, no college", "Bachelor&#39;s degree or advanced degree"</td>
-    </tr>
-    <tr>
-      <td class="left">Geographic Areas</td>
-      <td class="left">Terre Haute, IN</td>
-    </tr>
-    <tr>
-      <td class="left">Indicators</td>
-      <td class="left">Hires All (Stable): Average Monthly Earnings, Separations (Stable): Average Monthly Earnings, Job Change (Stable): Net Change</td>
-    </tr>
-    <tr>
-      <td class="left">Response Structure</td>
-      <td class="left">dense, flatLeaves</td>
-    </tr>
-  </tbody>
-</table>
+          </div>
+        </div>
+      </div>
+    </div>
 
 
-<p>Response:
-<pre class="code">
-{
-  "data": {
-    "1845460": {
-      "2008": {
-        "1": {
-          "E2": {
-            "earnseps": "2168",
-            "earnhiras": "2096",
-            "frmjbcs": "10"
-          },
-          "E4": {
-            "earnseps": "3414",
-            "earnhiras": "4250",
-            "frmjbcs": "151"
-          }
-        },
-        "2": {
-          "E4": {
-            "earnseps": "2984",
-            "earnhiras": "2978",
-            "frmjbcs": "-126"
-          },
-          "E2": {
-            "earnseps": "2042",
-            "earnhiras": "1985",
-            "frmjbcs": "-281"
-          }
-        },
-        "3": {
-          "E2": {
-            "earnseps": "2181",
-            "earnhiras": "2184",
-            "frmjbcs": "380"
-          },
-          "E4": {
-            "earnseps": "3701",
-            "earnhiras": "3513",
-            "frmjbcs": "244"
-          }
-        },
-        "4": {
-          "E4": {
-            "earnseps": "3090",
-            "earnhiras": "3236",
-            "frmjbcs": "59"
-          },
-          "E2": {
-            "earnseps": "2020",
-            "earnhiras": "1969",
-            "frmjbcs": "-55"
-          }
-        }
-      },
-      "2014": {
-        "1": {
-          "E2": {
-            "earnseps": "2063",
-            "earnhiras": "1898",
-            "frmjbcs": "-72"
-          },
-          "E4": {
-            "earnseps": "3057",
-            "earnhiras": "2513",
-            "frmjbcs": "2"
-          }
-        },
-        "2": {
-          "E4": {
-            "earnseps": "3004",
-            "earnhiras": "3293",
-            "frmjbcs": "-106"
-          },
-          "E2": {
-            "earnseps": "2094",
-            "earnhiras": "2359",
-            "frmjbcs": "-251"
-          }
-        },
-        "3": {
-          "E2": {
-            "earnseps": "2278",
-            "earnhiras": "2321",
-            "frmjbcs": "59"
-          },
-          "E4": {
-            "earnseps": "3392",
-            "earnhiras": "2878",
-            "frmjbcs": "-10"
-          }
-        },
-        "4": {
-          "E2": {
-            "earnseps": "2352",
-            "earnhiras": "2358",
-            "frmjbcs": "-202"
-          },
-          "E4": {
-            "earnseps": "3283",
-            "earnhiras": "3022",
-            "frmjbcs": "-52"
-          }
-        }
-      }
-    }
-  }
-}
-</pre></p>
-
-<h3>Example 3</h3>
-
-<p><pre class="code">&lt;host server address&gt;/data/year20102015/industry00054/geography0641940/educationE4/sex?fields=HirNS&amp;fields=EarnHirNS&amp;flat=true</pre></p>
-
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-
-  <colgroup>
-    <col class="left" />
-    <col class="left" />
-  </colgroup>
-
-  <thead>
-    <tr>
-      <th scope="col" class="left">Category</th>
-      <th scope="col" class="left">Requested</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr>
-      <td class="left">Years</td>
-      <td class="left">2010 to 2015</td>
-    </tr>
-    <tr>
-      <td class="left">NAICS Sector</td>
-      <td class="left">Professional, Scientific, and Technical Services</td>
-    </tr>
-    <tr>
-      <td class="left">Geographic Areas</td>
-      <td class="left"> San Jose-Sunnyvale-Santa Clara, CA (Silicon Valley)</td>
-    </tr>
-    <tr>
-      <td class="left">Education Level</td>
-      <td class="left">"Bachelor&#39;s degree or advanced degree"</td>
-    </tr>
-    <tr>
-      <td class="left">Sex</td>
-      <td class="left">male, female</td>
-    </tr>
-    <tr>
-      <td class="left">Indicators</td>
-      <td class="left">Hires New (Stable): Counts, Hires New (Stable): Average Monthly Earnings</td>
-    </tr>
-    <tr>
-      <td class="left">Response Structure</td>
-      <td class="left">flat</td>
-    </tr>
-  </tbody>
-</table>
-
-
-<p>Response:
-<pre class="code">
-{
-  "data": [
-    {
-      "year": "2014",
-      "industry": "54 ",
-      "geography": "0641940 ",
-      "education": "E4",
-      "sex": "1",
-      "hirns": "2704",
-      "earnhirns": "11276",
-      "quarter": "1"
-    },
-    {
-      "year": "2014",
-      "industry": "54 ",
-      "geography": "0641940 ",
-      "education": "E4",
-      "sex": "2",
-      "hirns": "1390",
-      "earnhirns": "8071",
-      "quarter": "1"
-    },
-    {
-      "year": "2014",
-      "industry": "54 ",
-      "geography": "0641940 ",
-      "education": "E4",
-      "sex": "1",
-      "hirns": "2748",
-      "earnhirns": "11542",
-      "quarter": "2"
-    },
-    {
-      "year": "2014",
-      "industry": "54 ",
-      "geography": "0641940 ",
-      "education": "E4",
-      "sex": "2",
-      "hirns": "1533",
-      "earnhirns": "8392",
-      "quarter": "2"
-    },
-    {
-      "year": "2014",
-      "industry": "54 ",
-      "geography": "0641940 ",
-      "education": "E4",
-      "sex": "2",
-      "hirns": "1625",
-      "earnhirns": "8609",
-      "quarter": "3"
-    },
-    {
-      "year": "2014",
-      "industry": "54 ",
-      "geography": "0641940 ",
-      "education": "E4",
-      "sex": "1",
-      "hirns": "3044",
-      "earnhirns": "11519",
-      "quarter": "3"
-    },
-    {
-      "year": "2014",
-      "industry": "54 ",
-      "geography": "0641940 ",
-      "education": "E4",
-      "sex": "1",
-      "hirns": "2927",
-      "earnhirns": "12317",
-      "quarter": "4"
-    },
-    {
-      "year": "2014",
-      "industry": "54 ",
-      "geography": "0641940 ",
-      "education": "E4",
-      "sex": "2",
-      "hirns": "1662",
-      "earnhirns": "9474",
-      "quarter": "4"
-    },
-    {
-      "year": "2015",
-      "industry": "54 ",
-      "geography": "0641940 ",
-      "education": "E4",
-      "sex": "1",
-      "hirns": "2782",
-      "earnhirns": "11884",
-      "quarter": "1"
-    },
-    {
-      "year": "2015",
-      "industry": "54 ",
-      "geography": "0641940 ",
-      "education": "E4",
-      "sex": "2",
-      "hirns": "1552",
-      "earnhirns": "8816",
-      "quarter": "1"
-    }
-  ]
-}
-</pre></p>
-
-<h1>Deployment<a id="sec-8" name="sec-8"></a></h1>
-
-<p>NOTE: These scripts will take hours to run.</p>
-
-<p>Configuration files are in <pre class="code">/config/</pre>.
-You should definitely change the default passwords.</p>
-
-<pre><pre class="code">npm install --prod
-cd bin/
-./initQWIDatabase.sh //!!! DROPS EXISTING QWI_POSTGRES_DB DATABASE AND QWI_POSTGRES_USER !!!
-./createTables.sh
-./loadData.sh
-./createIndices.sh
-</pre></pre>
-
-
-    <!-- Footer
-       ================================================== -->
+  <!-- Footer
+     ================================================== -->
     <footer class="bs-docs-footer" role="contentinfo">
     </footer>
     <!-- Bootstrap core JavaScript
        ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
 
-    <script   src="https://code.jquery.com/jquery-3.0.0.min.js"   
-              integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0="   
-              crossorigin="anonymous">
-    </script>
+    <script   src="https://code.jquery.com/jquery-2.2.4.min.js"   
+              integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   
+              crossorigin="anonymous"></script>
 
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" 
             integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" 
             crossorigin="anonymous">
     </script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/js/umd/scrollspy.js"></script>
     <script >
       $(function(){
 
       $('body').scrollspy({target:".bs-docs-sidebar"});
 
+console.log($('.bs-docs-sidebar'))
       $('.bs-docs-sidebar').affix({
         offset: {
           top: 420,
+          right: 100,
           bottom: function () {
             return (this.bottom = $('.footer').outerHeight(true))
           }

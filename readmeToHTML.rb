@@ -7,6 +7,7 @@ docHTML = GitHub::Markup.render('README.markdown', File.read('./README.md'))
 
 docHTML = docHTML.gsub(/<code>JSON|<code>/, "<pre class=\"code\">")
 docHTML = docHTML.gsub(/<\/code>/, "<\/pre>")
+docHTML = docHTML.gsub(/^/, "            ")
 
 indexHTML = indexTemplate.gsub(/<!--__GENERATED_DOCUMENTATION_INSERTED_HERE___-->/, docHTML)
 

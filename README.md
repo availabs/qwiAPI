@@ -1,25 +1,48 @@
-- [Introduction](#sec-1)
-- [QWI Dataset Overview](#sec-2)
-- [Additional Route Segments](#sec-3)
-  - [Specifying the Response Structure](#sec-3-1)
-  - [Supported Category Combinations](#sec-3-2)
-    - [Supported Demographic and Establishment Category Interactions](#sec-3-2-1)
-- [Category Codes](#sec-4)
-    - [agegrp](#sec-4-1)
-    - [education](#sec-4-2)
-    - [ethnicity](#sec-4-3)
-    - [race](#sec-4-4)
-    - [firmage](#sec-4-5)
-    - [firmsize](#sec-4-6)
-    - [industry](#sec-4-7)
-    - [geography](#sec-4-8)
-- [Indicators](#sec-5)
-- [Additional Query Parameters](#sec-6)
-    - [flat responses](#sec-6-1)
-    - [flat leaves](#sec-6-2)
-    - [dense](#sec-6-3)
-- [Syntax and Examples](#sec-7)
-- [Deployment](#sec-8)
+<div class="col-md-3" role="complementary">
+  <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm" style="position:fixed">
+    <ul class="nav bs-docs-sidenav">
+
+      <li><a href="#sec-1">Introduction</a></li>
+      <li><a href="#sec-2">QWI Dataset Overview</a></li>
+      <li><a href="#sec-3">Additional Route Segments</a>
+
+      <ul>
+        <li><a href="#sec-3-1">Specifying the Response Structure</a></li>
+        <li><a href="#sec-3-2">Supported Category Combinations</a>
+
+        <ul>
+          <li><a href="#sec-3-2-1">Supported Demographic and Establishment Category Interactions</a></li>
+        </ul>
+        </li>
+      </ul>
+      </li>
+      <li><a href="#sec-4">Category Codes</a>
+
+        <ul>
+          <li><a href="#sec-4-1">agegrp</a></li>
+          <li><a href="#sec-4-2">education</a></li>
+          <li><a href="#sec-4-3">ethnicity</a></li>
+          <li><a href="#sec-4-4">race</a></li>
+          <li><a href="#sec-4-5">firmage</a></li>
+          <li><a href="#sec-4-6">firmsize</a></li>
+          <li><a href="#sec-4-7">industry</a></li>
+          <li><a href="#sec-4-8">geography</a></li>
+        </ul>
+      </li>
+      <li><a href="#sec-5">Indicators</a></li>
+      <li><a href="#sec-6">Additional Query Parameters</a>
+
+        <ul>
+          <li><a href="#sec-6-1">flat responses</a></li>
+          <li><a href="#sec-6-2">flat leaves</a></li>
+          <li><a href="#sec-6-3">dense</a></li>
+        </ul>
+      </li>
+      <li><a href="#sec-7">Syntax and Examples</a></li>
+      <li><a href="#sec-8">Deployment</a></li>
+    </ul>
+  </nav>
+</div>
 
 
 # TL;DR
