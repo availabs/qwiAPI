@@ -836,7 +836,7 @@ heirarchial structure.
 
 Refer to the [Syntax and Examples](#sec-7) section for greater details.
 
-# Syntax and Syntax and Examples<a id="sec-7" name="sec-7">
+# Syntax and Examples<a id="sec-7" name="sec-7">
 
 Note: All data queries begin with the route segment `/data/`.
 
