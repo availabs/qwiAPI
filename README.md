@@ -1261,13 +1261,16 @@ Response:
 
 # Deployment<a id="sec-8" name="sec-8">
 NOTE: These scripts will take hours to run.
+
+Configuration files are in `/config/`.
+You should definitely change the default passwords.
+
+
 ```
 npm install --prod
 cd bin/
-./initQWIDatabase.sh
+./initQWIDatabase.sh //!!! DROPS EXISTING QWI_POSTGRES_DB DATABASE AND QWI_POSTGRES_USER !!!
 ./createTables.sh
 ./loadData.sh
 ./createIndices.sh
 ```
-
-
