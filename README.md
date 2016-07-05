@@ -20,10 +20,13 @@ _NOTE: This documentation page is a work in progress._
     - [flat responses](#sec-6-1)
     - [flat leaves](#sec-6-2)
     - [dense](#sec-6-3)
+- [Syntax and Examples](#sec-6)
 
+
+# TL;DR
+[Syntax and Examples](#sec-6)
 
 # Introduction<a id="sec-1" name="sec-1"></a>
-
 
 This project was created under a grant from the [Ewing Marion Kauffman Foundation](http://www.kauffman.org/).
 
@@ -201,8 +204,13 @@ is less than the length specified in the following table.
   </tbody>
 </table>
 
-A more detailed explanation of the routing syntax follows in the [API Syntax]() section,
-and examples can be found in the [Examples]() section.
+
+NOTE: if exactly two years are specified in the 'year' segment of the route,
+they will be interpreted as a span. For example the segment `year20012015`
+will return data from the range 2001 to 2015, inclusive. To turn off this behavior,
+specify one of the years twice, as in `year200120152015`.
+
+A more detailed explanation of the routing syntax follows in the [Syntax and Examples]() section.
 
 
 ## Supported category combinations<a id="sec-2-1" name="sec-3-2-1"></a>
@@ -237,6 +245,10 @@ The following categories can be used in combination with any others:
 * quarter
 
 In fact, _'geography' is required in all requests_. (The dataset is too large to return all geographies by default.)
+
+'year' and 'quarter' are added automatically to the selected fields. 
+Even if they do not appear in a dynamic route,
+they will appear in the response leaves. 
 
 For the sake clarity, supported demographic and establishment category interactions shown in the following table.
 
@@ -299,8 +311,7 @@ with a bachelor’s degree or advanced degree would result in an error code beca
 the combination of employee age group and education level is not supported.
   ~~`/agegrpA05/educationE4`~~
 
-A more detailed explanation of the routing syntax follows in the [API Syntax]() section,
-and examples can be found in the [Examples]() section.
+A more detailed explanation of the routing syntax follows in the [Syntax and Examples]() section.
 
 
 # Category Codes<a id="sec-4" name="sec-4"></a>
@@ -776,8 +787,7 @@ Requested indicators are specified using the (possibly repeated) 'fields' query 
 For example, to request 'TurnOvrS' and 'Payroll', the query portion of the request would contain
 `?fields=TurnOvrs&fields=Payroll`.
 
-A more detailed explanation of the query parameter syntax follows in the [API Syntax]() section,
-and examples can be found in the [Examples]() section.
+A more detailed explanation of the query parameter syntax follows in the [Syntax and Examples]() section.
 
 Note that the status flag for each indicator is also available. Status flag names are simply 
 the indicator name prepended with an 's'.
@@ -817,4 +827,437 @@ to remove this redundancy clients may specify 'dense=true'
 This will remove from the leaves all information contained in the response's
 heirarchial structure.
 
-Examples can be found in the [Examples]() section.
+Refer to the [Syntax and Examples]() section for greater details.
+
+# Syntax and Syntax and Examples<a id="sec-7" name="sec-7">
+
+All data queries begin with the route segment `/data/`.
+
+### Example 1
+`<host server address>/data/geography3510740/year20142016/quarter/industry00023/firmage01?fields=payroll&dense=true&flatLeaves=true`
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+  <colgroup>
+    <col class="left" />
+    <col class="left" />
+  </colgroup>
+
+  <thead>
+    <tr>
+      <th scope="col" class="left">Query Breakdown</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td class="left">Geographic Area</td>
+      <td class="left">Albany-Schenectady-Troy, NY</td>
+    </tr>
+    <tr>
+      <td class="left">NAICS Sector</td>
+      <td class="left">Construction</td>
+    </tr>
+    <tr>
+      <td class="left">Years</td>
+      <td class="left">2014, 2015, 2016</td>
+    </tr>
+    <tr>
+      <td class="left">Quarters</td>
+      <td class="left">1, 2, 3, 4</td>
+    </tr>
+    <tr>
+      <td class="left">Firm ages</td>
+      <td class="left">'All Firm Ages', '0-1 Years'</td>
+    </tr>
+    <tr>
+      <td class="left">Indicator</td>
+      <td class="left">Total Quarterly Payroll</td>
+    </tr>
+  </tbody>
+
+</table>
+
+Response: 
+```JSON
+{
+  "data": {
+    "3510740": {
+      "2014": {
+        "1": {
+          "23": {
+            "0": {
+              "payroll": "208426378"
+            },
+            "1": {
+              "payroll": "6568167"
+            }
+          }
+        },
+        "2": {
+          "23": {
+            "0": {
+              "payroll": "225950219"
+            },
+            "1": {
+              "payroll": "6964256"
+            }
+          }
+        },
+        "3": {
+          "23": {
+            "0": {
+              "payroll": "235418956"
+            },
+            "1": {
+              "payroll": "7972830"
+            }
+          }
+        }
+      },
+      "2015": {
+        "1": {
+          "23": {
+            "0": {
+              "payroll": "212303401"
+            },
+            "1": {
+              "payroll": "7862891"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+
+### Example 2
+`<host server address>/data/year20082009//quarter/educationE2E4/geography24125803229820?fields=EarnSepS&fields=EarnHirAS&fields=FrmJbCS&dense=true`
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+  <colgroup>
+    <col class="left" />
+    <col class="left" />
+  </colgroup>
+
+  <thead>
+    <tr>
+      <th scope="col" class="left">Query Breakdown</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td class="left">Years</td>
+      <td class="left">2008 & 2009</td>
+    </tr>
+    <tr>
+      <td class="left">Quarters</td>
+      <td class="left">1, 2, 3, 4</td>
+    </tr>
+    <tr>
+      <td class="left">NAICS Sector</td>
+      <td class="left">All</td>
+    </tr>
+    <tr>
+      <td class="left">Education Levels</td>
+      <td class="left">'High school or equivalent, no college', 'Bachelor’s degree or advanced degree'</td>
+    </tr>
+    <tr>
+      <td class="left">Geographic Areas</td>
+      <td class="left">Baltimore-Columbia-Towson, MD, and Las Vegas-Henderson-Paradise, NV</td>
+    </tr>
+    <tr>
+      <td class="left">Indicators</td>
+      <td class="left">Hires All (Stable): Average Monthly Earnings, Separations (Stable): Average Monthly Earnings, Job Change (Stable): Net Change</td>
+    </tr>
+  </tbody>
+
+</table>
+
+Response:
+```JSON
+{
+  "data": {
+    "2008": {
+      "1": {
+        "E4": {
+          "2412580": [
+            {
+              "earnseps": "4573",
+              "earnhiras": "4155",
+              "frmjbcs": "1297"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "4258",
+              "earnhiras": "4112",
+              "frmjbcs": "852"
+            }
+          ]
+        },
+        "E2": {
+          "2412580": [
+            {
+              "earnseps": "2279",
+              "earnhiras": "2243",
+              "frmjbcs": "381"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "2521",
+              "earnhiras": "2567",
+              "frmjbcs": "950"
+            }
+          ]
+        }
+      },
+      "2": {
+        "E4": {
+          "2412580": [
+            {
+              "earnseps": "4482",
+              "earnhiras": "4798",
+              "frmjbcs": "-1473"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "4080",
+              "earnhiras": "4167",
+              "frmjbcs": "-304"
+            }
+          ]
+        },
+        "E2": {
+          "2412580": [
+            {
+              "earnseps": "2400",
+              "earnhiras": "2519",
+              "frmjbcs": "-2935"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "2664",
+              "earnhiras": "2751",
+              "frmjbcs": "-843"
+            }
+          ]
+        }
+      },
+      "3": {
+        "E4": {
+          "2412580": [
+            {
+              "earnseps": "4826",
+              "earnhiras": "4599",
+              "frmjbcs": "-1021"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "4141",
+              "earnhiras": "3962",
+              "frmjbcs": "-985"
+            }
+          ]
+        },
+        "E2": {
+          "2412580": [
+            {
+              "earnseps": "2451",
+              "earnhiras": "2419",
+              "frmjbcs": "-456"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "2711",
+              "earnhiras": "2671",
+              "frmjbcs": "-1759"
+            }
+          ]
+        }
+      },
+      "4": {
+        "E2": {
+          "2412580": [
+            {
+              "earnseps": "2551",
+              "earnhiras": "2545",
+              "frmjbcs": "-3707"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "2810",
+              "earnhiras": "2686",
+              "frmjbcs": "-3902"
+            }
+          ]
+        },
+        "E4": {
+          "2412580": [
+            {
+              "earnseps": "5655",
+              "earnhiras": "4844",
+              "frmjbcs": "-2389"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "4412",
+              "earnhiras": "4132",
+              "frmjbcs": "-3477"
+            }
+          ]
+        }
+      }
+    },
+    "2009": {
+      "1": {
+        "E4": {
+          "2412580": [
+            {
+              "earnseps": "4701",
+              "earnhiras": "4187",
+              "frmjbcs": "311"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "4109",
+              "earnhiras": "3635",
+              "frmjbcs": "-2248"
+            }
+          ]
+        },
+        "E2": {
+          "2412580": [
+            {
+              "earnseps": "2313",
+              "earnhiras": "2252",
+              "frmjbcs": "-1076"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "2614",
+              "earnhiras": "2357",
+              "frmjbcs": "-2935"
+            }
+          ]
+        }
+      },
+      "2": {
+        "E2": {
+          "2412580": [
+            {
+              "earnseps": "2449",
+              "earnhiras": "2594",
+              "frmjbcs": "-6133"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "2623",
+              "earnhiras": "2585",
+              "frmjbcs": "-5162"
+            }
+          ]
+        },
+        "E4": {
+          "2412580": [
+            {
+              "earnseps": "4563",
+              "earnhiras": "4812",
+              "frmjbcs": "-3406"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "3847",
+              "earnhiras": "4128",
+              "frmjbcs": "-3144"
+            }
+          ]
+        }
+      },
+      "3": {
+        "E4": {
+          "2412580": [
+            {
+              "earnseps": "4904",
+              "earnhiras": "4614",
+              "frmjbcs": "-1222"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "4100",
+              "earnhiras": "3653",
+              "frmjbcs": "-1974"
+            }
+          ]
+        },
+        "E2": {
+          "2412580": [
+            {
+              "earnseps": "2496",
+              "earnhiras": "2415",
+              "frmjbcs": "-726"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "2788",
+              "earnhiras": "2375",
+              "frmjbcs": "-2531"
+            }
+          ]
+        }
+      },
+      "4": {
+        "E2": {
+          "2412580": [
+            {
+              "earnseps": "2664",
+              "earnhiras": "2694",
+              "frmjbcs": "-2276"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "2746",
+              "earnhiras": "2549",
+              "frmjbcs": "-3873"
+            }
+          ]
+        },
+        "E4": {
+          "2412580": [
+            {
+              "earnseps": "5994",
+              "earnhiras": "4851",
+              "frmjbcs": "-2426"
+            }
+          ],
+          "3229820": [
+            {
+              "earnseps": "4565",
+              "earnhiras": "3970",
+              "frmjbcs": "-3209"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+```
