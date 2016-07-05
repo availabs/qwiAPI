@@ -1,5 +1,3 @@
-_NOTE: This documentation page is a work in progress._
-
 - [Introduction](#sec-1)
 - [QWI Dataset Overview](#sec-2)
 - [Additional Route Segments](#sec-3)

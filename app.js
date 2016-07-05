@@ -1,6 +1,6 @@
 "use strict"
 
-
+const express = require('express')
 const envFile = require('node-env-file')
 envFile(__dirname + '/config/node_server.env')
 envFile(__dirname + '/config/postgres_db.env')
@@ -8,7 +8,10 @@ envFile(__dirname + '/config/qwi.env')
 
 const env = require('process').env
 
-const app = require('express')()
+
+const app = express()
+
+
 const bodyParser = require('body-parser')
 
 const async = require('async')
@@ -42,6 +45,7 @@ app.use(function(req, res, next) {
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
+app.use('/', express.static('static'))
 
 
 const handleError = (res, err) => {
@@ -49,13 +53,6 @@ const handleError = (res, err) => {
   res.status(500).send({ error: err.message })
 }
 
-app.get('/', (req, res) => res.status(200).send({
-  message: "Documentation page not yet created. Route structures follows the patterns in the BDS API (http://bds.availabs.org/), while sticking to the QWI variable names (http://lehd.ces.census.gov/data/schema/latest/lehd_public_use_schema.html)",
-  sampleURLs: [
-    'http://qwi.availabs.org/data/geography3410900/industry31-33/year20102015/quarter?fields=emp&fields=payroll&dense=true',
-    'http://qwi.availabs.org/derived-data/measure-ratios-by-firmage/geography0110700/year/quarter/industry/firmage?fields=emp_ratio&fields=payroll_ratio',
-  ]
-}))
 
 app.get('/metadata/labels', (req, res) => {
   return res.status(200).send(labels)
