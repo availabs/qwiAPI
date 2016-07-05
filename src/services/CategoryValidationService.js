@@ -21,14 +21,15 @@ const _ = require('lodash')
 const demographicCategories = require('../../metadata/identifiers').demographicCategories
 const firmCategories = require('../../metadata/identifiers').firmCategories
 
-const validDemographicCategoryCombinations = require('../../metadata/tables').validDemographicCategoryCombinations 
+const validDemographicCategoryCombinations = require('../../metadata/tables').validDemographicCategoryCombinations
 
 
 // Code taken from http://codereview.stackexchange.com/a/75663
 const pairwise = (list) => {
   if (list.length < 2) { return [] }
-  let first = _.first(list),
-      rest  = _.rest(list),
+  list.sort()
+  let first = _.head(list),
+      rest  = _.tail(list),
       pairs = _.map(rest, x => [first, x])
   return _.flatten([pairs, pairwise(rest)], true)
 }
@@ -37,8 +38,8 @@ const pairwise = (list) => {
 // The following function makes sure the requested category combination is supported by the dataset.
 const validateWorkerCharacteristicCombinations = (reqCategories) => {
     let reqWorkerCategories = _.intersection(reqCategories, demographicCategories).sort()
-     
-    let invalidCombos = _.differenceWith(pairwise(reqWorkerCategories), validDemographicCategoryCombinations, _.equals)
+
+    let invalidCombos = _.differenceWith(pairwise(reqWorkerCategories), validDemographicCategoryCombinations, _.isEqual)
 
     if (invalidCombos.length) {
       return 'The following combination pairs are not supported: [' + invalidCombos.join(', ') + ']'
