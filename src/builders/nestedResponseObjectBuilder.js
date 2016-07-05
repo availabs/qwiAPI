@@ -7,6 +7,9 @@ const build = (parsedQueryObject, cb) => {
   try {
     let rows = parsedQueryObject.result.rows
 
+    // Trim all the strings at the leaves.
+    rows = rows.map(row => _.mapValues(row, val => (val && val.trim) ? val.trim() : val))
+
     if (parsedQueryObject.flatResult) {
       return cb(null, rows)
     }
@@ -23,7 +26,6 @@ const build = (parsedQueryObject, cb) => {
       
       let row = rows[i]
 
-      row.geography = row.geography.trim()
 
       cur = nestedResult
       for (j = 0; j < (nestingCategories.length - 1); ++j) {
@@ -33,10 +35,10 @@ const build = (parsedQueryObject, cb) => {
       }
 
       // The last column in the nesting.
-      column = nestingCategories[j];
+      column = nestingCategories[j]
       value = (row[column] && row[column].trim) ? row[column].trim() : row[column]
 
-      data = (parsedQueryObject.denseResult) ? _.omit(row, nestingCategories) : row;
+      data = (parsedQueryObject.denseResult) ? _.omit(row, nestingCategories) : row
 
       if (parsedQueryObject.flatLeaves) {
         if (cur[value]) {

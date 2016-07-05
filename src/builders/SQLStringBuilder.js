@@ -38,12 +38,7 @@ function buildSQLString (parsedQueryObject, cb) {
 
       // If no geography codes are provided, we default to returning the data for all the states.
       if (!wherePredicates.geography) {
-        // We do not allow the all metros request. Client must specifically request metro areas.
-        if (_.includes(wherePredicates.geo_level, 'm')) {
-          return cb(new Error('For metro-level queries, you must specify the metro codes to return.'))
-        }
-
-        wherePredicates.geo_level = ['S']
+        return cb(new Error('One or more geography codes must be specified.'))
       }
 
      parsedQueryObject.sqlStatement = 
