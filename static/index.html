@@ -1,3 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AVAIL | Quarterly Workforce Indicators (QWI) API</title>
+
+    <!-- Viewport mobile tag for sensible mobile support -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    
+    <!--  
+        Stylesheets and Preprocessors
+        ==============================
+
+        You can always bring in CSS files manually with `<link>` tags, or asynchronously
+        using a solution like AMD (RequireJS).  Or, if you like, you can take advantage 
+        of Sails' conventional asset pipeline (boilerplate Gruntfile).
+
+        By default, stylesheets from your `assets/styles` folder are included
+        here automatically (between STYLES and STYLES END). Both CSS (.css) and LESS (.less)
+        are supported. In production, your styles will be minified and concatenated into
+        a single file.
+        
+        To customize any part of the built-in behavior, just edit `tasks/pipeline.js`.
+        For example, here are a few things you could do:
+            
+            + Change the order of your CSS files
+            + Import stylesheets from other directories
+            + Use a different or additional preprocessor, like SASS, SCSS or Stylus
+    -->
+
+    <!--STYLES-->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" 
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" 
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" 
+          crossorigin="anonymous">
+
+    <link rel="stylesheet" href="/styles/docs.css">
+    <link rel="stylesheet" href="/styles/nvd3.css">
+    <link rel="stylesheet" href="/styles/white/application.css">
+    <!--STYLES END-->
+  </head>
+
+  <body>
+    <!-- Docs master nav -->
+
+    <div class="navbar2 navbar-fixed-top navbar-default">
+      <div class="container">
+        <div class="navbar2">
+          <button class="navbar-toggle" data-toggle="collapse" data-target="#main-nav">
+            <!--<span class="icon-bar"></span>-->
+            <!--<span class="icon-bar"></span>-->
+            <!--<span class="icon-bar"></span>-->
+          </button>
+          <a class="navbar-brand" href="http://availabs.org/"><img src="/images/logo.png" alt="AVAIL Logo"></a>
+        </div>
+        <nav class="collapse navbar-collapse bs-navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li>
+              <a href="/">API Documentation</a>
+            </li>
+            <li>
+              <a href="/zip_analysis/">Interactive</a>
+            </li> 
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="http://availabs.org/" target=_blank>Home</a></li>
+            <li><a href="http://availabs.org/about" target=_blank>About</a></li>
+            <li><a href="http://availabs.org/project" target=_blank>Projects</a></li>
+            <li><a href="http://availabs.org/api" target=_blank>APIs</a></li>
+            <li><a href="http://blog.availabs.org/" target=_blank>Blog</a></li>
+          </ul>
+        </nav>  
+      </div>  
+    </div>
+
+    <div class="bs-docs-header2" id="content">
+       <div class="container">
+          <div class="col-md-8">
+            <h1>Quarterly Workforce Indicators (QWI)</h1>
+            <p>
+              A REST API for accessing the 
+              <a href="http://lehd.ces.census.gov/data/#qwi">
+                Quarterly Workforce Indicators (QWI)
+              </a> 
+              dataset.
+            </p>
+          </div>
+          <div class="col-md-4">
+          <a href="http://www.kauffman.org/" target='blank'><img alt="AVAIL Logo" src="/images/kauffman.png"></a>
+          </div>
+       </div>
+    </div>
+
 <ul>
 <li><a href="#sec-1">Introduction</a></li>
 <li><a href="#sec-2">QWI Dataset Overview</a></li>
@@ -106,23 +200,23 @@ however <em>this API only serves data found in the metropolitian-level CSVs</em>
 
 <h2>Specifying the Response Structure<a id="sec-3-1" name="sec-3-1"></a></h2>
 
-<p>The <code>qwiAPI</pre> features <em>Dynamic Routes</em> that allow clients to query the dataset
+<p>The <pre class="code">qwiAPI</pre> features <em>Dynamic Routes</em> that allow clients to query the dataset
 based on worker demographics, employer characteristics, and/or industry,
 The server response will be in the form of a JSON object
 with a hierarchial structure that parallels the query&#39;s Dynamic Route.
 In other words, <em>users of this API can specify the structure of the response object
 through the stucture of the route they use to request the data</em>.
 This functionality makes for exceptionally clean code in client apps.
-(This behavior can be turned off via the <code>flat</pre> parameter, as described below.)</p>
+(This behavior can be turned off via the <pre class="code">flat</pre> parameter, as described below.)</p>
 
 <p>For example, if the client wanted a response broken down by industry, then firmage,
-the dynamic route would contain the sequence <code>/industry/firmage</pre>.
+the dynamic route would contain the sequence <pre class="code">/industry/firmage</pre>.
 The response object would contain data nested in that order: each industry would have a object keyed by firmage.
-Conversely, <code>/firmage/industry</pre> would yield a response where each firmage has an object keyed by industry code.</p>
+Conversely, <pre class="code">/firmage/industry</pre> would yield a response where each firmage has an object keyed by industry code.</p>
 
 <p>To specifically request all 0-1 year firms in Construction,
 the request would include the respective QWI firmage code
-and NAICS industry code: <code>/industry00023/firmage1</pre>.
+and NAICS industry code: <pre class="code">/industry00023/firmage1</pre>.
 Notice that the industry value is zero-padded.</p>
 
 <p>The required code lengths for the route parameters are specified below in the <a href="">API Syntax</a> section.</p>
@@ -224,9 +318,9 @@ is less than the length specified in the following table.
 
 
 <p>NOTE: if exactly two years are specified in the "year" segment of the route,
-they will be interpreted as a span. For example the segment <code>year20012015</pre>
+they will be interpreted as a span. For example the segment <pre class="code">year20012015</pre>
 will return data from the range 2001 to 2015, inclusive. To turn off this behavior,
-specify one of the years twice, as in <code>year200120152015</pre>.</p>
+specify one of the years twice, as in <pre class="code">year200120152015</pre>.</p>
 
 <p>A more detailed explanation of the routing syntax follows in the <a href="#sec-7">Syntax and Examples</a> section.</p>
 
@@ -331,12 +425,12 @@ they will appear in the response leaves.</p>
 
 <p>For example, API clients can request data for all female employees
 with a bachelor" sub-route:
-  <code>/sex2/educationE4</pre></p>
+  <pre class="code">/sex2/educationE4</pre></p>
 
 <p>However, a query for all 35-44 year old employees
 with a bachelor"s is invalid because
 the combination of employee age group and education level is not supported.
-  <del><code>/agegrpA05/educationE4</pre></del></p>
+  <del><pre class="code">/agegrpA05/educationE4</pre></del></p>
 
 <p>A more detailed explanation of the routing syntax follows in the <a href="#sec-7">Syntax and Examples</a> section.</p>
 
@@ -820,7 +914,7 @@ The URI dynamic path segments must contain only the aggregation categories,
 "industry", "geography", "year", and "quarter".
 Requested indicators are specified using the (possibly repeated) "fields" query parameter.
 For example, to request "TurnOvrS" and "Payroll", the query portion of the request would contain
-<code>?fields=TurnOvrs&amp;fields=Payroll</pre>.</p>
+<pre class="code">?fields=TurnOvrs&amp;fields=Payroll</pre>.</p>
 
 <p>A more detailed explanation of the query parameter syntax follows in the <a href="#sec-7">Syntax and Examples</a> section.</p>
 
@@ -836,13 +930,13 @@ structure of the response object.</p>
 <h2>Flat Responses<a id="sec-6-1" name="sec-6-1"></a></h2>
 
 <p>If the hierarchical structure of the response object is not desired,
-data may be returned as an array of rows by passing the query parameter <code>flat=true</pre>.</p>
+data may be returned as an array of rows by passing the query parameter <pre class="code">flat=true</pre>.</p>
 
 <h2>Flat Leaves<a id="sec-6-2" name="sec-6-2"></a></h2>
 
 <p>By default, the leafs of the hierarchical response object will be arrays.
 This may not be the desired functionality, so
-it is possible to request flat leaves with the <code>flatLeaves=true</pre> query parameter.
+it is possible to request flat leaves with the <pre class="code">flatLeaves=true</pre> query parameter.
 Note that if the length of the leaf arrays does not equal 1,
 specifying "flatLeaves" will result in an error.
 Specifically, to request flat leaves,
@@ -854,7 +948,7 @@ the leaf arrays will contain elements for each economic quarter.</p>
 
 <p>By default, the leaves of the response object will contain fields for each
 segment of the dynamic route. This means that information is repeated.
-For example, if the route contains <code>/industry/race/year/quarter</pre>, each of those categories
+For example, if the route contains <pre class="code">/industry/race/year/quarter</pre>, each of those categories
 will appear as a key in the response object&#39;s leaves with the respective variable&#39;s value,
 and therefore this information will also be contained in the keys of each layer of
 If the client has not specified "flat=true" in the query parameters,
@@ -864,13 +958,13 @@ heirarchial structure.</p>
 
 <p>Refer to the <a href="#sec-7">Syntax and Examples</a> section for greater details.</p>
 
-<h1>Syntax and Examples<a id="sec-7" name="sec-7"></h1>
+<h1>Syntax and Examples<a id="sec-7" name="sec-7"></a></h1>
 
-<p>Note: All data queries begin with the route segment <code>/data/</pre>.</p>
+<p>Note: All data queries begin with the route segment <pre class="code">/data/</pre>.</p>
 
 <h3>Example 1</h3>
 
-<p><code>&lt;host server address&gt;/data/geography3510740/year20142016/quarter/industry00023/firmage01?fields=payroll&amp;dense=true&amp;flatLeaves=true</pre></p>
+<p><pre class="code">&lt;host server address&gt;/data/geography3510740/year20142016/quarter/industry00023/firmage01?fields=payroll&amp;dense=true&amp;flatLeaves=true</pre></p>
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -976,7 +1070,7 @@ heirarchial structure.</p>
 
 <h3>Example 2</h3>
 
-<p><code>&lt;host server address&gt;/data/year200820142014//quarter/educationE2E4/geography1845460?fields=EarnSepS&amp;fields=EarnHirAS&amp;fields=FrmJbCS&amp;dense=true&amp;flatLeaves=true</pre></p>
+<p><pre class="code">&lt;host server address&gt;/data/year200820142014//quarter/educationE2E4/geography1845460?fields=EarnSepS&amp;fields=EarnHirAS&amp;fields=FrmJbCS&amp;dense=true&amp;flatLeaves=true</pre></p>
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -1137,7 +1231,7 @@ heirarchial structure.</p>
 
 <h3>Example 3</h3>
 
-<p><code>&lt;host server address&gt;/data/year20102015/industry00054/geography0641940/educationE4/sex?fields=HirNS&amp;fields=EarnHirNS&amp;flat=true</pre></p>
+<p><pre class="code">&lt;host server address&gt;/data/year20102015/industry00054/geography0641940/educationE4/sex?fields=HirNS&amp;fields=EarnHirNS&amp;flat=true</pre></p>
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
@@ -1294,17 +1388,56 @@ heirarchial structure.</p>
 }
 </pre></p>
 
-<h1>Deployment<a id="sec-8" name="sec-8"></h1>
+<h1>Deployment<a id="sec-8" name="sec-8"></a></h1>
 
 <p>NOTE: These scripts will take hours to run.</p>
 
-<p>Configuration files are in <code>/config/</pre>.
+<p>Configuration files are in <pre class="code">/config/</pre>.
 You should definitely change the default passwords.</p>
 
-<pre><code>npm install --prod
+<pre><pre class="code">npm install --prod
 cd bin/
 ./initQWIDatabase.sh //!!! DROPS EXISTING QWI_POSTGRES_DB DATABASE AND QWI_POSTGRES_USER !!!
 ./createTables.sh
 ./loadData.sh
 ./createIndices.sh
 </pre></pre>
+
+
+    <!-- Footer
+       ================================================== -->
+    <footer class="bs-docs-footer" role="contentinfo">
+    </footer>
+    <!-- Bootstrap core JavaScript
+       ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+
+    <script   src="https://code.jquery.com/jquery-3.0.0.min.js"   
+              integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0="   
+              crossorigin="anonymous">
+    </script>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" 
+            integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" 
+            crossorigin="anonymous">
+    </script>
+
+    <script >
+      $(function(){
+
+      $('body').scrollspy({target:".bs-docs-sidebar"});
+
+      $('.bs-docs-sidebar').affix({
+        offset: {
+          top: 420,
+          bottom: function () {
+            return (this.bottom = $('.footer').outerHeight(true))
+          }
+        }
+      });
+    })
+    </script>
+
+  </body>
+</html>

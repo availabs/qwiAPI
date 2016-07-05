@@ -836,7 +836,7 @@ heirarchial structure.
 
 Refer to the [Syntax and Examples](#sec-7) section for greater details.
 
-# Syntax and Examples<a id="sec-7" name="sec-7">
+# Syntax and Examples<a id="sec-7" name="sec-7"></a>
 
 Note: All data queries begin with the route segment `/data/`.
 
@@ -1265,7 +1265,7 @@ Response:
 ```
 
 
-# Deployment<a id="sec-8" name="sec-8">
+# Deployment<a id="sec-8" name="sec-8"></a>
 NOTE: These scripts will take hours to run.
 
 Configuration files are in `/config/`.
