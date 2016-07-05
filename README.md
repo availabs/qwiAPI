@@ -20,11 +20,12 @@ _NOTE: This documentation page is a work in progress._
     - [flat responses](#sec-6-1)
     - [flat leaves](#sec-6-2)
     - [dense](#sec-6-3)
-- [Syntax and Examples](#sec-6)
+- [Syntax and Examples](#sec-7)
+- [Deployment](#sec-8)
 
 
 # TL;DR
-[Syntax and Examples](#sec-6)
+[Syntax and Examples](#sec-7)
 
 # Introduction<a id="sec-1" name="sec-1"></a>
 
@@ -210,7 +211,7 @@ they will be interpreted as a span. For example the segment `year20012015`
 will return data from the range 2001 to 2015, inclusive. To turn off this behavior,
 specify one of the years twice, as in `year200120152015`.
 
-A more detailed explanation of the routing syntax follows in the [Syntax and Examples]() section.
+A more detailed explanation of the routing syntax follows in the [Syntax and Examples](#sec-7) section.
 
 
 ## Supported category combinations<a id="sec-2-1" name="sec-3-2-1"></a>
@@ -311,7 +312,7 @@ with a bachelor’s degree or advanced degree would result in an error code beca
 the combination of employee age group and education level is not supported.
   ~~`/agegrpA05/educationE4`~~
 
-A more detailed explanation of the routing syntax follows in the [Syntax and Examples]() section.
+A more detailed explanation of the routing syntax follows in the [Syntax and Examples](#sec-7) section.
 
 
 # Category Codes<a id="sec-4" name="sec-4"></a>
@@ -787,7 +788,7 @@ Requested indicators are specified using the (possibly repeated) 'fields' query 
 For example, to request 'TurnOvrS' and 'Payroll', the query portion of the request would contain
 `?fields=TurnOvrs&fields=Payroll`.
 
-A more detailed explanation of the query parameter syntax follows in the [Syntax and Examples]() section.
+A more detailed explanation of the query parameter syntax follows in the [Syntax and Examples](#sec-7) section.
 
 Note that the status flag for each indicator is also available. Status flag names are simply 
 the indicator name prepended with an 's'.
@@ -827,11 +828,11 @@ to remove this redundancy clients may specify 'dense=true'
 This will remove from the leaves all information contained in the response's
 heirarchial structure.
 
-Refer to the [Syntax and Examples]() section for greater details.
+Refer to the [Syntax and Examples](#sec-7) section for greater details.
 
 # Syntax and Syntax and Examples<a id="sec-7" name="sec-7">
 
-All data queries begin with the route segment `/data/`.
+Note: All data queries begin with the route segment `/data/`.
 
 ### Example 1
 `<host server address>/data/geography3510740/year20142016/quarter/industry00023/firmage01?fields=payroll&dense=true&flatLeaves=true`
@@ -1099,8 +1100,6 @@ Response:
 ```
 
 
-
-
 ### Example 3
 `<host server address>/data/year20102015/industry00054/geography0641940/educationE4/sex?fields=HirNS&fields=EarnHirNS&flat=true`
 
@@ -1134,6 +1133,10 @@ Response:
     <tr>
       <td class="left">Education Level</td>
       <td class="left">'Bachelor’s degree or advanced degree'</td>
+    </tr>
+    <tr>
+      <td class="left">Sex</td>
+      <td class="left">male, female</td>
     </tr>
     <tr>
       <td class="left">Indicators</td>
@@ -1253,6 +1256,18 @@ Response:
     }
   ]
 }
+```
+
+
+- [Deployment](#sec-8)
+NOTE: These scripts will take hours to run.
+```
+npm install --prod
+cd bin/
+./initQWIDatabase.sh
+./createTables.sh
+./loadData.sh
+./createIndices.sh
 ```
 
 
