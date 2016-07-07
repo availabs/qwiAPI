@@ -95,48 +95,40 @@
 
     <div class="container bs-docs-container">
       <div class="row">
-        <div class="col-md-9" role="main">
-          <div class="bs-docs-section">
 <!--__GENERATED_DOCUMENTATION_INSERTED_HERE___-->
-          </div>
-        </div>
       </div>
     </div>
 
 
   <!-- Footer
      ================================================== -->
-    <footer class="bs-docs-footer" role="contentinfo">
+    <footer class="footer bs-docs-footer" role="contentinfo">
     </footer>
     <!-- Bootstrap core JavaScript
        ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
 
-    <script   src="https://code.jquery.com/jquery-2.2.4.min.js"   
-              integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   
-              crossorigin="anonymous"></script>
-
     <!-- Latest compiled and minified JavaScript -->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" 
             integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" 
             crossorigin="anonymous">
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/js/umd/scrollspy.js"></script>
     <script >
       $(function(){
 
-      $('body').scrollspy({target:".bs-docs-sidebar"});
+        $(document.body).scrollspy({target:$(".bs-docs-sidebar")})
 
-console.log($('.bs-docs-sidebar'))
-      $('.bs-docs-sidebar').affix({
-        offset: {
-          top: 420,
-          right: 100,
-          bottom: function () {
-            return (this.bottom = $('.footer').outerHeight(true))
+        $('#nav-sidebar').affix({
+          offset: {
+            top: 100,
+            right: 0,
+            bottom: function () {
+              return (this.bottom = $('.footer').outerHeight(true))
+            }
           }
-        }
-      });
+        });
     })
     </script>
 

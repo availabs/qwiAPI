@@ -1,6 +1,6 @@
-<div class="col-md-3" role="complementary">
-  <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm" style="position:fixed">
-    <ul class="nav bs-docs-sidenav">
+<div class="col-md-3" role="complementary" >
+  <nav id="foobar" class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix">
+    <ul id="nav-sidebar" class="nav bs-docs-sidenav">
 
       <li><a href="#sec-1">Introduction</a></li>
       <li><a href="#sec-2">QWI Dataset Overview</a></li>
@@ -44,6 +44,8 @@
   </nav>
 </div>
 
+
+<!--__BEGIN_DOCS_SECTION__-->
 
 # TL;DR
 [Syntax and Examples](#sec-7)
@@ -92,8 +94,9 @@ From the [Quarterly Workforce Indicators 101](http://lehd.ces.census.gov/doc/QWI
 > important local labor market trends.
 > The source data for the QWI is the Longitudinal Employer-Household Dynamics (LEHD) linked employeremployee
 > microdata. The LEHD data is massive longitudinal database covering over 95% of U.S. private sector
-> jobs. Much of this data is collected via a unique federal&mdash;state data sharing collaboration, the Local Employment
-> Dynamics (LED) partnership. LED is a cooperative venture between the LEHD program at the U.S. Census
+> jobs. Much of this data is collected via a unique federal&mdash;state data sharing collaboration, 
+> the Local Employment Dynamics (LED) partnership. 
+> LED is a cooperative venture between the LEHD program at the U.S. Census
 > Bureau and state agencies of all 50 states, the District of Columbia, Puerto Rico, and the U.S. Virgin Islands2.
 >
 > Partner states voluntarily submit quarterly data files from existing administrative record systems, which are
@@ -663,6 +666,10 @@ The Census Bureau provides a composite file containing all geocodes:
 The following table, taken from the 
 [LEHD Public Use Data Schema V4.0.5](http://lehd.ces.census.gov/data/schema/latest/lehd_public_use_schema.html#_a_id_indicators_a_indicators), lists the indicator variables available in the data set. 
 
+For a thorough explanation of these indicators, 
+the [Technical User Guides](http://lehd.ces.census.gov/learning/#technical_user_guides)
+provided by the Census Bureau are an excellent resource.
+
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
   <colgroup>
@@ -965,7 +972,7 @@ Response:
     }
   }
 }
-```
+```<!--END_CODE-->
 
 
 ### Example 2
@@ -1126,7 +1133,7 @@ Response:
     }
   }
 }
-```
+```<!--END_CODE-->
 
 
 ### Example 3
@@ -1285,21 +1292,27 @@ Response:
     }
   ]
 }
-```
+```<!--END_CODE-->
 
 
 # Deployment<a id="sec-8" name="sec-8"></a>
 NOTE: These scripts will take hours to run.
 
 Configuration files are in `/config/`.
-You should definitely change the default passwords.
+You should definitely change the default passwords and 
+inspect the postgres configuration for conflicts with any
+existing databases, users, tables, and indices.
 
 
-```
+<pre class="code">
 npm install --prod
+
 cd bin/
+
 ./initQWIDatabase.sh //!!! DROPS EXISTING QWI_POSTGRES_DB DATABASE AND QWI_POSTGRES_USER !!!
 ./createTables.sh
 ./loadData.sh
 ./createIndices.sh
-```
+</pre>
+
+<!--__END_DOCS_SECTION__-->
