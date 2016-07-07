@@ -4,7 +4,6 @@ require 'github/markup'
 indexTemplate = File.read('./index.template.html')
 
 docHTML = GitHub::Markup.render('README.markdown', File.read('./README.md'))
-puts docHTML
 
 docsSectionBegin = %{
 <div class="col-md-9" role="main">
