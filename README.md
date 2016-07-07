@@ -972,7 +972,7 @@ Response:
     }
   }
 }
-```<!--END_CODE-->
+``` <!--END_CODE-->
 
 
 ### Example 2
@@ -1133,7 +1133,7 @@ Response:
     }
   }
 }
-```<!--END_CODE-->
+``` <!--END_CODE-->
 
 
 ### Example 3
@@ -1292,7 +1292,7 @@ Response:
     }
   ]
 }
-```<!--END_CODE-->
+``` <!--END_CODE-->
 
 
 # Deployment<a id="sec-8" name="sec-8"></a>
