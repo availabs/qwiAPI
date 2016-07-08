@@ -132,7 +132,7 @@ the request would include the respective QWI firmage code
 and NAICS industry code: `/industry00023/firmage1`.
 Notice that the industry value is zero-padded. 
 
-The required code lengths for the route parameters are specified below in the [API Syntax]() section.
+The required code lengths for the route parameters are specified below in the [Examples and Syntax](#sec-7) section.
 
 ## Supported query parameters and their lengths<a id="sec-3-2" name="sec-3-2"></a>
 
@@ -238,7 +238,7 @@ specify one of the years twice, as in `year200120152015`.
 A more detailed explanation of the routing syntax follows in the [Syntax and Examples](#sec-7) section.
 
 
-## Supported category combinations<a id="sec-2-1" name="sec-3-2-1"></a>
+## Supported category combinations<a id="sec-3-2-1" name="sec-3-2-1"></a>
 
 From the [Quarterly Workforce Indicators 101](http://lehd.ces.census.gov/doc/QWI_101.pdf) document:
 
@@ -302,32 +302,32 @@ For the sake clarity, supported demographic and establishment category interacti
 
   <tbody>
     <tr>
-      <td class="left">sex & agegrp</td>
+      <td class="left">sex &amp; agegrp</td>
       <td class="left">firmage</td>
     </tr>
 
     <tr>
-      <td class="left">sex & education</td>
+      <td class="left">sex &amp; education</td>
       <td class="left">firmage</td>
     </tr>
 
     <tr>
-      <td class="left">race & ethnicity</td>
+      <td class="left">race &amp; ethnicity</td>
       <td class="left">firmage</td>
     </tr>
 
     <tr>
-      <td class="left">sex & agegrp</td>
+      <td class="left">sex &amp; agegrp</td>
       <td class="left">firmsize</td>
     </tr>
 
     <tr>
-      <td class="left">sex & education</td>
+      <td class="left">sex &amp; education</td>
       <td class="left">firmsize</td>
     </tr>
 
     <tr>
-      <td class="left">race & ethnicity</td>
+      <td class="left">race &amp; ethnicity</td>
       <td class="left">firmsize</td>
     </tr>
   </tbody>

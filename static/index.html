@@ -30,11 +30,13 @@
 
     <!--STYLES-->
     <!-- Latest compiled and minified CSS -->
+    <!--<link rel="stylesheet" -->
+          <!--href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" -->
+          <!--integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" -->
+          <!--crossorigin="anonymous">-->
+    <!--<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">-->
     <link rel="stylesheet" 
-          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" 
-          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" 
-          crossorigin="anonymous">
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+          href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/css/bootstrap.min.css">
 
     <link rel="stylesheet" href="/styles/docs.css">
     <link rel="stylesheet" href="/styles/nvd3.css">
@@ -236,7 +238,7 @@
             and NAICS industry code: <code>/industry00023/firmage1</code>.
             Notice that the industry value is zero-padded.</p>
             
-            <p>The required code lengths for the route parameters are specified below in the <a href="">API Syntax</a> section.</p>
+            <p>The required code lengths for the route parameters are specified below in the <a href="#sec-7">Examples and Syntax</a> section.</p>
             
             <h2>Supported query parameters and their lengths<a id="sec-3-2" name="sec-3-2"></a></h2>
             
@@ -341,7 +343,7 @@
             
             <p>A more detailed explanation of the routing syntax follows in the <a href="#sec-7">Syntax and Examples</a> section.</p>
             
-            <h2>Supported category combinations<a id="sec-2-1" name="sec-3-2-1"></a></h2>
+            <h2>Supported category combinations<a id="sec-3-2-1" name="sec-3-2-1"></a></h2>
             
             <p>From the <a href="http://lehd.ces.census.gov/doc/QWI_101.pdf">Quarterly Workforce Indicators 101</a> document:</p>
             
@@ -408,32 +410,32 @@
             
               <tbody>
                 <tr>
-                  <td class="left">sex & agegrp</td>
+                  <td class="left">sex &amp; agegrp</td>
                   <td class="left">firmage</td>
                 </tr>
             
                 <tr>
-                  <td class="left">sex & education</td>
+                  <td class="left">sex &amp; education</td>
                   <td class="left">firmage</td>
                 </tr>
             
                 <tr>
-                  <td class="left">race & ethnicity</td>
+                  <td class="left">race &amp; ethnicity</td>
                   <td class="left">firmage</td>
                 </tr>
             
                 <tr>
-                  <td class="left">sex & agegrp</td>
+                  <td class="left">sex &amp; agegrp</td>
                   <td class="left">firmsize</td>
                 </tr>
             
                 <tr>
-                  <td class="left">sex & education</td>
+                  <td class="left">sex &amp; education</td>
                   <td class="left">firmsize</td>
                 </tr>
             
                 <tr>
-                  <td class="left">race & ethnicity</td>
+                  <td class="left">race &amp; ethnicity</td>
                   <td class="left">firmsize</td>
                 </tr>
               </tbody>
@@ -1087,7 +1089,7 @@
                 }
               }
             }
-            </code></p>
+            </pre></p>
             
             <h3>Example 2</h3>
             
@@ -1248,7 +1250,7 @@
                 }
               }
             }
-            </code></p>
+            </pre></p>
             
             <h3>Example 3</h3>
             
@@ -1407,7 +1409,7 @@
                 }
               ]
             }
-            </code></p>
+            </pre></p>
             
             <h1>Deployment<a id="sec-8" name="sec-8"></a></h1>
             
@@ -1452,17 +1454,21 @@
 
     <!-- Latest compiled and minified JavaScript -->
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" 
-            integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" 
-            crossorigin="anonymous">
-    </script>
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>-->
+<script   src="https://code.jquery.com/jquery-3.0.0.min.js"   integrity="sha256-JmvOoLtYsmqlsWxa7mDSLMwa6dZ9rrIdtrrVYRnDRH0="   crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/js/umd/scrollspy.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/js/umd/util.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/js/bootstrap.min.js"></script>
+    <!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" -->
+            <!--integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" -->
+            <!--crossorigin="anonymous">-->
+    <!--</script>-->
     <script >
       $(function(){
 
-        $(document.body).scrollspy({target:$(".bs-docs-sidebar")})
+        $(document.body).scrollspy({target:$("#foobar")})
 
-        $('#nav-sidebar').affix({
+        $('#foobar').affix({
           offset: {
             top: 100,
             right: 0,

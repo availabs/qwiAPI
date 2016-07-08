@@ -18,7 +18,7 @@ docsSectionEnd = %{
 
 
 docHTML = docHTML.gsub(/<code>JSON|<code>BASH/, "<pre class=\"code\">")
-docHTML = docHTML.gsub(/<\/code><!--END_CODE-->/, "<\/pre>")
+docHTML = docHTML.gsub(/^<\/code>/, "<\/pre>")
 docHTML = docHTML.gsub(/<!--__BEGIN_DOCS_SECTION__-->/, docsSectionBegin)
 docHTML = docHTML.gsub(/<!--__END_DOCS_SECTION__-->/, docsSectionEnd)
 docHTML = docHTML.gsub(/^/, "            ")
